@@ -11,6 +11,7 @@ import {
   Calendar,
   Clock,
   Award,
+  Trash2,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import { formatDateTime } from "@/lib/format";
@@ -21,7 +22,7 @@ export default function AdminResultsPage() {
   const [search, setSearch] = useState("");
   const [filterPassed, setFilterPassed] = useState<string>("all"); // "all", "passed", "failed"
 
-  useEffect(() => {
+  const fetchResults = () => {
     fetch("/api/admin/results")
       .then((res) => res.json())
       .then((data) => {
@@ -29,7 +30,48 @@ export default function AdminResultsPage() {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchResults();
   }, []);
+
+  // Natijani bazadan to'g'ridan to'g'ri o'chirish
+  const handleDeleteResult = async (id: string, studentName: string) => {
+    if (!confirm(`Haqiqatan ham "${studentName}" ning ushbu natijasini bazadan butunlay o'chirmoqchimisiz?`)) return;
+
+    try {
+      const res = await fetch(`/api/admin/results/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setResults((prev) => prev.filter((r) => r.id !== id));
+      } else {
+        const data = await res.json();
+        alert(data.error || "Natijani o'chirishda xatolik yuz berdi");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Aloqa xatoligi yuz berdi");
+    }
+  };
+
+  // Barcha natijalarni bazadan tozalash
+  const handleClearAllResults = async () => {
+    if (!confirm("DIQQAT! Bazadagi BARCHA test topshirish natijalarini to'liq o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi!")) return;
+
+    try {
+      const res = await fetch("/api/admin/results", { method: "DELETE" });
+      if (res.ok) {
+        setResults([]);
+        alert("Barcha natijalar bazadan muvaffaqiyatli tozalandi!");
+      } else {
+        const data = await res.json();
+        alert(data.error || "Natijalarni tozalashda xatolik");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Aloqa xatoligi yuz berdi");
+    }
+  };
 
   // Excel (.xlsx) ga eksport qilish
   const exportToExcel = () => {
@@ -77,7 +119,7 @@ export default function AdminResultsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Sarlavha & Excel eksport tugmasi */}
+      {/* Sarlavha & Amallar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
@@ -88,13 +130,25 @@ export default function AdminResultsPage() {
           </p>
         </div>
 
-        <button
-          onClick={exportToExcel}
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer self-start sm:self-auto"
-        >
-          <Download className="w-4 h-4" />
-          <span>Excel (.xlsx) Yuklab Olish</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {results.length > 0 && (
+            <button
+              onClick={handleClearAllResults}
+              className="px-4 py-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Natijalarni Tozalash</span>
+            </button>
+          )}
+
+          <button
+            onClick={exportToExcel}
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/30 transition-all cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            <span>Excel (.xlsx) Yuklab Olish</span>
+          </button>
+        </div>
       </div>
 
       {/* Qidiruv va Filterlar */}
@@ -108,7 +162,7 @@ export default function AdminResultsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Talaba, guruh yoki test bo'yicha qidiruv..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
           />
         </div>
 
@@ -117,7 +171,7 @@ export default function AdminResultsPage() {
             onClick={() => setFilterPassed("all")}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               filterPassed === "all"
-                ? "bg-indigo-600 text-white"
+                ? "bg-emerald-600 text-white"
                 : "bg-[#1C2541] text-slate-400 hover:text-white"
             }`}
           >
@@ -150,7 +204,7 @@ export default function AdminResultsPage() {
       <div className="glass-panel rounded-2xl border border-white/10 overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-slate-400 text-xs">
-            <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
             Natijalar yuklanmoqda...
           </div>
         ) : filteredResults.length === 0 ? (
@@ -170,49 +224,62 @@ export default function AdminResultsPage() {
                   <th className="px-6 py-4">Holat</th>
                   <th className="px-6 py-4">Vaqt</th>
                   <th className="px-6 py-4">Sana</th>
+                  <th className="px-6 py-4 text-right">Amal</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-slate-300">
-                {filteredResults.map((r) => (
-                  <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="px-6 py-4 font-semibold text-white">
-                      {r.user?.fullName || r.guestName || "Noma'lum"}
-                    </td>
-                    <td className="px-6 py-4 text-slate-300 font-mono">
-                      {r.user?.groupName || r.guestGroup || "-"}
-                    </td>
-                    <td className="px-6 py-4 max-w-xs truncate">
-                      {r.test?.title || "Test"}
-                    </td>
-                    <td className="px-6 py-4 font-medium">
-                      {r.correctAnswers} / {r.totalQuestions}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-extrabold text-white text-sm">
-                        {r.scorePercent}%
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {r.passed ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          <CheckCircle2 className="w-3 h-3" />
-                          <span>O&apos;tdi</span>
+                {filteredResults.map((r) => {
+                  const sName = r.user?.fullName || r.guestName || "Noma'lum";
+                  return (
+                    <tr key={r.id} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="px-6 py-4 font-semibold text-white">
+                        {sName}
+                      </td>
+                      <td className="px-6 py-4 text-slate-300 font-mono">
+                        {r.user?.groupName || r.guestGroup || "-"}
+                      </td>
+                      <td className="px-6 py-4 max-w-xs truncate">
+                        {r.test?.title || "Test"}
+                      </td>
+                      <td className="px-6 py-4 font-medium">
+                        {r.correctAnswers} / {r.totalQuestions}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-extrabold text-white text-sm">
+                          {r.scorePercent}%
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
-                          <XCircle className="w-3 h-3" />
-                          <span>O&apos;tmadi</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-slate-400">
-                      {Math.floor(r.timeSpentSeconds / 60)} daq {r.timeSpentSeconds % 60} sek
-                    </td>
-                    <td className="px-6 py-4 text-slate-400 font-mono">
-                      {formatDateTime(r.createdAt)}
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-4">
+                        {r.passed ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>O&apos;tdi</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                            <XCircle className="w-3 h-3" />
+                            <span>O&apos;tmadi</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-slate-400">
+                        {Math.floor(r.timeSpentSeconds / 60)} daq {r.timeSpentSeconds % 60} sek
+                      </td>
+                      <td className="px-6 py-4 text-slate-400 font-mono">
+                        {formatDateTime(r.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleDeleteResult(r.id, sName)}
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          title="Natijani bazadan o'chirish"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -64,13 +64,29 @@ export interface TestResultDTO {
 }
 
 // Lokal fayl bazasi (agar Neon DB hali ulanmagan bo'lsa avtomatik zaxira)
+// Lokal fayl bazasi (agar Neon DB hali ulanmagan bo'lsa avtomatik zaxira)
 const LOCAL_DATA_FILE = path.join(process.cwd(), "prisma", "local_backup_store.json");
+const TMP_DATA_FILE = path.join("/tmp", "local_backup_store.json");
+
+function getLocalDataFilePath(): string {
+  try {
+    const dir = path.dirname(LOCAL_DATA_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.accessSync(dir, fs.constants.W_OK);
+    return LOCAL_DATA_FILE;
+  } catch {
+    return TMP_DATA_FILE;
+  }
+}
 
 interface StoreData {
   users: any[];
   tests: any[];
   questions: any[];
   results: any[];
+  deletedIds?: string[];
 }
 
 function getInitialStore(): StoreData {
@@ -87,142 +103,50 @@ function getInitialStore(): StoreData {
         phone: "+998 90 123 45 67",
         createdAt: new Date().toISOString(),
       },
-      {
-        id: "student-1",
-        username: "talaba2026",
-        password: "$2b$10$.WHeHuVNw6X3R0tH.FzRQehbf6asiLfpJvYvbiFJditSNB92lAM/q", // admin123
-        fullName: "Aliyev Jasur Anvar o'g'li",
-        role: "STUDENT",
-        faculty: "Axborot texnologiyalari",
-        groupName: "AT-21",
-        phone: "+998 93 555 44 33",
-        createdAt: new Date().toISOString(),
-      },
     ],
-    tests: [
-      {
-        id: "test-demo-1",
-        title: "Dasturlash va Algoritmlash Asoslari",
-        description: "Talabalarning mantiqiy fikrlashi, algoritmlar va dasturlash asoslari bo'yicha dastlabki bilimlarini baholash testi.",
-        category: "Axborot Texnologiyalari",
-        timeLimit: 15,
-        passingScore: 60,
-        isActive: true,
-        accessCode: "algo-2026",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "test-demo-2",
-        title: "Oliy Matematika va Chiziqli Algebra",
-        description: "Matritsalar, determinantlar va ehtimollar nazariyasi bo'yicha universitet oraliq nazorat testi.",
-        category: "Matematika",
-        timeLimit: 20,
-        passingScore: 65,
-        isActive: true,
-        accessCode: "math-2026",
-        createdAt: new Date().toISOString(),
-      },
-      {
-        id: "test-demo-3",
-        title: "Psixodiagnostika va Shaxsiyat Tahlili",
-        description: "Talabalarning stressga chidamliligi, emotsional intellekti va kasbiy moyilligini ilmiy baholash.",
-        category: "Psixologiya & HR",
-        timeLimit: 10,
-        passingScore: 50,
-        isActive: true,
-        accessCode: "psy-2026",
-        createdAt: new Date().toISOString(),
-      },
-    ],
-    questions: [
-      {
-        id: "q-1-1",
-        testId: "test-demo-1",
-        questionText: "Vaqt murakkabligi O(1) bo'lgan amaliyot qaysi biri hisoblanadi?",
-        points: 1,
-        optionA: "Massiv elementiga indeks orqali murojaat qilish",
-        optionB: "Bog'langan ro'yxatdan element qidirish",
-        optionC: "Binary search daraxtida qidirish",
-        optionD: "Massivni tartiblash (QuickSort)",
-        correctAnswer: "A",
-        orderIndex: 0,
-      },
-      {
-        id: "q-1-2",
-        testId: "test-demo-1",
-        questionText: "FIFO (First In, First Out) tamoyili qaysi ma'lumotlar tuzilmasiga xos?",
-        points: 1,
-        optionA: "Stack (Stek)",
-        optionB: "Queue (Navbat)",
-        optionC: "Binary Tree",
-        optionD: "Hash Table",
-        correctAnswer: "B",
-        orderIndex: 1,
-      },
-      {
-        id: "q-1-3",
-        testId: "test-demo-1",
-        questionText: "HTTP 404 xatosi nimani anglatadi?",
-        points: 1,
-        optionA: "Server ichki xatosi",
-        optionB: "Resurs topilmadi (Not Found)",
-        optionC: "Muvaffaqiyatli bajarildi",
-        optionD: "Ruxsat etilmagan (Forbidden)",
-        correctAnswer: "B",
-        orderIndex: 2,
-      },
-      {
-        id: "q-2-1",
-        testId: "test-demo-2",
-        questionText: "Agar matritsaning determinanti 0 ga teng bo'lsa, bu nima degani?",
-        points: 1,
-        optionA: "Teskari matritsa mavjud emas (Maxsus matritsa)",
-        optionB: "Birlik matritsa",
-        optionC: "Matritsa faqat musbat sonlardan iborat",
-        optionD: "Teskari matritsa aynan o'ziga teng",
-        correctAnswer: "A",
-        orderIndex: 0,
-      },
-      {
-        id: "q-3-1",
-        testId: "test-demo-3",
-        questionText: "Emotsional intellekt (EQ) tushunchasining asosiy komponenti qaysi?",
-        points: 1,
-        optionA: "O'z his-tuyg'ularini anglash va boshqara olish",
-        optionB: "Faqat mantiqiy masalalarni yechish tezligi",
-        optionC: "Xotira hajmining kattaligi",
-        optionD: "Chet tillarini tez o'zlashtirish",
-        correctAnswer: "A",
-        orderIndex: 0,
-      },
-    ],
+    tests: [],
+    questions: [],
     results: [],
+    deletedIds: [],
   };
 }
 
 function readLocalStore(): StoreData {
   try {
-    if (!fs.existsSync(LOCAL_DATA_FILE)) {
+    const filePath = getLocalDataFilePath();
+    if (!fs.existsSync(filePath)) {
       const initial = getInitialStore();
-      const dir = path.dirname(LOCAL_DATA_FILE);
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(LOCAL_DATA_FILE, JSON.stringify(initial, null, 2), "utf-8");
+      writeLocalStore(initial);
       return initial;
     }
-    const content = fs.readFileSync(LOCAL_DATA_FILE, "utf-8");
-    return JSON.parse(content);
+    const content = fs.readFileSync(filePath, "utf-8");
+    const parsed: StoreData = JSON.parse(content);
+    if (!parsed.deletedIds) parsed.deletedIds = [];
+
+    // O'chirilgan ID larni to'liq tozalash
+    parsed.tests = (parsed.tests || []).filter((t: any) => !parsed.deletedIds?.includes(t.id));
+    parsed.users = (parsed.users || []).filter((u: any) => !parsed.deletedIds?.includes(u.id));
+    parsed.questions = (parsed.questions || []).filter((q: any) => !parsed.deletedIds?.includes(q.id));
+    parsed.results = (parsed.results || []).filter((r: any) => !parsed.deletedIds?.includes(r.id));
+
+    return parsed;
   } catch {
     return getInitialStore();
   }
 }
 
 function writeLocalStore(data: StoreData) {
+  const filePath = getLocalDataFilePath();
   try {
-    const dir = path.dirname(LOCAL_DATA_FILE);
+    const dir = path.dirname(filePath);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(LOCAL_DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
   } catch (err) {
-    console.error("Local store write error:", err);
+    try {
+      fs.writeFileSync(TMP_DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
+    } catch (e2) {
+      console.error("Local store write error:", err, e2);
+    }
   }
 }
 
@@ -250,9 +174,30 @@ export const dbService = {
   // Foydalanuvchini topish (username orqali)
   async getUserByUsername(username: string) {
     if (await checkPostgres()) {
-      return await prisma.user.findUnique({
+      let user = await prisma.user.findUnique({
         where: { username },
       });
+
+      // Agar Postgres yangi bo'lsa va admin hali kiritilmagan bo'lsa, avtomatik yaratish
+      if (!user && username.toLowerCase() === "adminuniver") {
+        try {
+          user = await prisma.user.create({
+            data: {
+              username: "adminuniver",
+              password: "$2b$10$4TvrJV1wfqtw6FmjKdWlE..XwiL2dzuKeRrocgdRwvyoJ2Tixy2DW", // universityadminuz
+              fullName: "Universitet Bosh Administratori",
+              role: "ADMIN",
+              faculty: "Rektorat",
+              groupName: "Admin",
+              phone: "+998 90 123 45 67",
+            },
+          });
+        } catch (err) {
+          console.error("Postgres auto-create admin error:", err);
+        }
+      }
+
+      return user;
     }
     const store = readLocalStore();
     return store.users.find((u) => u.username.toLowerCase() === username.toLowerCase()) || null;
@@ -380,8 +325,9 @@ export const dbService = {
     if (await checkPostgres()) {
       try {
         await prisma.testResult.deleteMany({ where: { userId } });
-        await prisma.user.delete({ where: { id: userId } });
-        return true;
+        await prisma.user.delete({ where: { id: userId } }).catch((err) => {
+          console.warn("Postgres user delete warning:", err?.message);
+        });
       } catch (err) {
         console.error("Postgres deleteStudent error:", err);
       }
@@ -389,6 +335,8 @@ export const dbService = {
     const store = readLocalStore();
     store.users = store.users.filter((u) => u.id !== userId);
     store.results = store.results.filter((r) => r.userId !== userId);
+    if (!store.deletedIds) store.deletedIds = [];
+    if (!store.deletedIds.includes(userId)) store.deletedIds.push(userId);
     writeLocalStore(store);
     return true;
   },
@@ -566,8 +514,9 @@ export const dbService = {
       try {
         await prisma.testResult.deleteMany({ where: { testId: id } });
         await prisma.question.deleteMany({ where: { testId: id } });
-        await prisma.test.delete({ where: { id } });
-        return true;
+        await prisma.test.delete({ where: { id } }).catch((err) => {
+          console.warn("Postgres test delete warning:", err?.message);
+        });
       } catch (err) {
         console.error("Postgres deleteTest error:", err);
       }
@@ -577,6 +526,8 @@ export const dbService = {
     store.tests = store.tests.filter((t) => t.id !== id);
     store.questions = store.questions.filter((q) => q.testId !== id);
     store.results = store.results.filter((r) => r.testId !== id);
+    if (!store.deletedIds) store.deletedIds = [];
+    if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
     writeLocalStore(store);
     return true;
   },
@@ -631,10 +582,18 @@ export const dbService = {
   // Savolni o'chirish
   async deleteQuestion(id: string) {
     if (await checkPostgres()) {
-      return await prisma.question.delete({ where: { id } });
+      try {
+        await prisma.question.delete({ where: { id } }).catch((err) => {
+          console.warn("Postgres question delete warning:", err?.message);
+        });
+      } catch (err) {
+        console.error("Postgres deleteQuestion error:", err);
+      }
     }
     const store = readLocalStore();
     store.questions = store.questions.filter((q) => q.id !== id);
+    if (!store.deletedIds) store.deletedIds = [];
+    if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
     writeLocalStore(store);
     return true;
   },
@@ -818,6 +777,42 @@ export const dbService = {
       test: test ? { ...test, questions } : null,
       user: user || null,
     };
+  },
+
+  // Test natijasini o'chirish
+  async deleteResult(id: string) {
+    if (await checkPostgres()) {
+      try {
+        await prisma.testResult.delete({ where: { id } }).catch((err) => {
+          console.warn("Postgres result delete warning:", err?.message);
+        });
+      } catch (err) {
+        console.error("Postgres deleteResult error:", err);
+      }
+    }
+
+    const store = readLocalStore();
+    store.results = store.results.filter((r) => r.id !== id);
+    if (!store.deletedIds) store.deletedIds = [];
+    if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
+    writeLocalStore(store);
+    return true;
+  },
+
+  // Barcha natijalarni tozalash
+  async deleteAllResults() {
+    if (await checkPostgres()) {
+      try {
+        await prisma.testResult.deleteMany({});
+      } catch (err) {
+        console.error("Postgres deleteAllResults error:", err);
+      }
+    }
+
+    const store = readLocalStore();
+    store.results = [];
+    writeLocalStore(store);
+    return true;
   },
 
   // Admin Dashboard statistikalari
