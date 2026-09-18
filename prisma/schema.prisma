@@ -1,0 +1,90 @@
+// Prisma schema for Univer Test Platform
+// Neon Serverless PostgreSQL database configuration
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Foydalanuvchilar (Adminlar va Talabalar)
+model User {
+  id          String       @id @default(uuid())
+  username    String       @unique
+  password    String       // bcrypt bilan xeshlangan
+  fullName    String
+  role        String       @default("STUDENT") // "ADMIN" | "STUDENT"
+  faculty     String?      // Masalan: "Axborot texnologiyalari"
+  groupName   String?      // Masalan: "AT-21"
+  phone       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  results     TestResult[]
+
+  @@index([username])
+  @@index([role])
+}
+
+// Testlar (Fanlar, mavzular)
+model Test {
+  id           String       @id @default(uuid())
+  title        String
+  description  String?
+  category     String       @default("Umumiy") // Masalan: "Matematika", "Psixodiagnostika", "Informatika"
+  timeLimit    Int          @default(20) // daqiqalarda
+  passingScore Int          @default(60) // o'tish bali (%)
+  isActive     Boolean      @default(true)
+  accessCode   String       @unique @default(uuid()) // Ommaviy havola (mass link / QR-kod) uchun
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  questions    Question[]
+  results      TestResult[]
+
+  @@index([accessCode])
+  @@index([category])
+}
+
+// Savollar va Variantlar (A, B, C, D)
+model Question {
+  id            String   @id @default(uuid())
+  testId        String
+  test          Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  questionText  String
+  points        Int      @default(1)
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String   // "A", "B", "C", "D"
+  orderIndex    Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  @@index([testId])
+}
+
+// Test Topshirish Natijalari
+model TestResult {
+  id               String   @id @default(uuid())
+  testId           String
+  test             Test     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestName        String?  // Ommaviy havola orqali kirgan bo'lsa
+  guestGroup       String?  // Ommaviy havola orqali kirgan bo'lsa
+  totalQuestions   Int
+  correctAnswers   Int
+  scorePercent     Float
+  passed           Boolean
+  timeSpentSeconds Int
+  answersJson      String   // Tanlangan javoblar JSON (masalan: {"questionId": "A"})
+  createdAt        DateTime @default(now())
+
+  @@index([testId])
+  @@index([userId])
+}

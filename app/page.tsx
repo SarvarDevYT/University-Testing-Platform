@@ -1,69 +1,300 @@
-import Image from "next/image";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { dbService } from "@/lib/db-service";
+import Link from "next/link";
+import {
+  Clock,
+  CheckCircle,
+  Users,
+  ShieldCheck,
+  Award,
+  ArrowRight,
+  FileSpreadsheet,
+  Brain,
+  GraduationCap,
+  Sparkles,
+  QrCode,
+  Zap,
+} from "lucide-react";
+import QuickJoinForm from "@/components/QuickJoinForm";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const tests = await dbService.getTests(true);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="min-h-screen flex flex-col bg-[#0B132B]">
+      <Navbar />
+
+      <main className="flex-grow pt-20">
+        {/* HERO SECTION */}
+        <section id="hero" className="relative overflow-hidden pt-14 pb-20 md:pt-24 md:pb-32">
+          {/* Orqa fon nur effekti */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
+          <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-xs font-semibold text-cyan-300 mb-6 backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Universitet uchun 100% Bepul va Ommaviy Test Tizimi</span>
+            </div>
+
+            {/* Sarlavha */}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight md:leading-[1.15]">
+              Yagona havola orqali{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-indigo-200">
+                1000+ talabadan
+              </span>{" "}
+              bir vaqtda test oling
+            </h1>
+
+            {/* Tavsif */}
+            <p className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              Oliy ta&apos;lim muassasalari, fakultetlar va o&apos;qituvchilar uchun mo&apos;ljallangan zamonaviy
+              imtihon, oraliq nazorat va diagnostika platformasi. Yuqori yuklamalarda qotmaydi, natijalarni
+              avtomatik tahlil qiladi.
+            </p>
+
+            {/* Tugmalar */}
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                href="#tests-catalog"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+              >
+                <span>Testlar katalogi</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/login"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-cyan-300 bg-[#1C2541]/80 hover:bg-[#1C2541] border border-white/10 hover:border-cyan-400/50 shadow-md transition-all flex items-center justify-center gap-2"
+              >
+                <span>CRM Admin Panel</span>
+              </Link>
+            </div>
+
+            {/* Quick Join Widget */}
+            <div id="join-code" className="mt-14 max-w-xl mx-auto">
+              <QuickJoinForm />
+            </div>
+
+            {/* Asosiy ko'rsatkichlar */}
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              <div className="glass-panel p-5 rounded-2xl">
+                <div className="text-3xl font-extrabold text-cyan-400">1000+</div>
+                <div className="text-xs text-slate-400 mt-1 font-medium">Bir vaqtda talaba</div>
+              </div>
+              <div className="glass-panel p-5 rounded-2xl">
+                <div className="text-3xl font-extrabold text-indigo-400">100%</div>
+                <div className="text-xs text-slate-400 mt-1 font-medium">Avto-baholash va aniqlik</div>
+              </div>
+              <div className="glass-panel p-5 rounded-2xl">
+                <div className="text-3xl font-extrabold text-emerald-400">0 soniya</div>
+                <div className="text-xs text-slate-400 mt-1 font-medium">Kutish va qotishlarsiz</div>
+              </div>
+              <div className="glass-panel p-5 rounded-2xl">
+                <div className="text-3xl font-extrabold text-amber-400">Excel / PDF</div>
+                <div className="text-xs text-slate-400 mt-1 font-medium">Tezkor hisobot eksporti</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TESTLAR KATALOGI */}
+        <section id="tests-catalog" className="py-16 md:py-24 bg-[#0E1736] border-y border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+              <div>
+                <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+                  Diagnostika va Sinov
+                </div>
+                <h2 className="text-3xl font-extrabold text-white">
+                  Mavjud Testlar Katalogi
+                </h2>
+                <p className="text-slate-400 text-sm mt-2 max-w-xl">
+                  Universitet fanlari, oraliq nazoratlar hamda mantiqiy-psixologik diagnostika testlari to&apos;plami.
+                </p>
+              </div>
+              <div className="text-xs text-slate-400">
+                Jami faol testlar: <span className="font-bold text-white">{tests.length} ta</span>
+              </div>
+            </div>
+
+            {tests.length === 0 ? (
+              <div className="text-center py-16 glass-panel rounded-2xl">
+                <Brain className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-white">Hozircha faol testlar yo&apos;q</h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  Administrator CRM paneli orqali yangi testlar va savollar qo&apos;shishi mumkin.
+                </p>
+                <Link
+                  href="/login"
+                  className="mt-4 inline-block px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold"
+                >
+                  Admin bo&apos;lib kirish
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tests.map((test) => (
+                  <div
+                    key={test.id}
+                    className="glass-panel rounded-2xl p-6 flex flex-col justify-between glass-card-hover group border border-white/5 relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-bl-full pointer-events-none" />
+
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-950/80 text-cyan-300 border border-indigo-500/20">
+                          {test.category}
+                        </span>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
+                          <Clock className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{test.timeLimit} daqiqa</span>
+                        </div>
+                      </div>
+
+                      <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-2 mt-1">
+                        {test.title}
+                      </h3>
+
+                      <p className="text-xs text-slate-400 mt-2.5 line-clamp-3 leading-relaxed">
+                        {test.description || "Ushbu test bo'yicha talabalarning bilimi va amaliy ko'nikmalari baholanadi."}
+                      </p>
+                    </div>
+
+                    <div className="pt-6 mt-6 border-t border-white/5">
+                      <div className="flex items-center justify-between text-xs text-slate-400 mb-4 font-medium">
+                        <span>O&apos;tish bali: <strong className="text-white">{test.passingScore}%</strong></span>
+                        <span>Savollar: <strong className="text-white">{test._count?.questions || 0} ta</strong></span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/exam/${test.accessCode}`}
+                          className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-center text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <span>Testni boshlash</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* QANDAY ISHLAYDI? */}
+        <section id="how-it-works" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+              Oddiy va Qulay
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
+              Platformadan Foydalanish Jarayoni
+            </h2>
+            <p className="text-slate-400 text-sm mt-3">
+              To&apos;rtta oddiy qadam orqali talabalardan test oling va shaffof tahlillarga ega bo&apos;ling.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="glass-panel p-6 rounded-2xl relative">
+              <div className="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-extrabold text-lg mb-4">
+                01
+              </div>
+              <h4 className="text-base font-bold text-white mb-2">Talaba hisobi yoki Link</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Admin har bir talabaga shaxsiy login-parol yaratib beradi yoki to&apos;g&apos;ridan-to&apos;g&apos;ri ommaviy test linkini yuboradi.
+              </p>
+            </div>
+
+            <div className="glass-panel p-6 rounded-2xl relative">
+              <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-extrabold text-lg mb-4">
+                02
+              </div>
+              <h4 className="text-base font-bold text-white mb-2">Testni Yechish</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Talaba taymer ostida A, B, C, D variantlarini belgilaydi. Internet uzilsa ham javoblar avtomatik saqlanib turadi.
+              </p>
+            </div>
+
+            <div className="glass-panel p-6 rounded-2xl relative">
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-400 flex items-center justify-center font-extrabold text-lg mb-4">
+                03
+              </div>
+              <h4 className="text-base font-bold text-white mb-2">Avtomatik Baholash</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Tizim 1 soniyada to&apos;g&apos;ri va noto&apos;g&apos;ri javoblarni hisoblab, yakuniy ball va foizni chiqaradi.
+              </p>
+            </div>
+
+            <div className="glass-panel p-6 rounded-2xl relative">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-extrabold text-lg mb-4">
+                04
+              </div>
+              <h4 className="text-base font-bold text-white mb-2">CRM Hisoboti va Excel</h4>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Barcha guruhlar bo&apos;yicha natijalar administrator CRM paneliga yig&apos;iladi va Excel formatida yuklab olinadi.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* AFZALLIKLAR SECTION */}
+        <section id="features" className="py-20 bg-[#0E1736] border-t border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-2xl mx-auto mb-16">
+              <h2 className="text-3xl font-extrabold text-white">
+                Universitet Uchun Maxsus Imkoniyatlar
+              </h2>
+              <p className="text-slate-400 text-sm mt-3">
+                Katta hajmdagi talabalar oqimini qiynalmasdan boshqarish uchun eng zamonaviy vositalar.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="glass-panel p-7 rounded-2xl">
+                <div className="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mb-5">
+                  <Users className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Talabalar CRM Boshqaruvi</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Admin panelida har bir talabani kiritish, unga alohida login-parol berish, fakultet va guruhlar
+                  kesimida boshqarish hamda ro&apos;yxatni ommaviy yuklash imkoniyati.
+                </p>
+              </div>
+
+              <div className="glass-panel p-7 rounded-2xl">
+                <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mb-5">
+                  <QrCode className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Ommaviy Havola va QR-Kod</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Auditoriyadagi 100+ talaba bitta QR-kodni skanerlab yoki havola orqali testga ulanishi mumkin.
+                  Ortiqcha ro&apos;yxatdan o&apos;tish talab etilmaydi.
+                </p>
+              </div>
+
+              <div className="glass-panel p-7 rounded-2xl">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-5">
+                  <Zap className="w-6 h-6" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Neon Cloud & Yuqori Tezlik</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Neon Serverless Postgres va Vercel infratuzilmasi orqali birdaniga yuzlab so&apos;rovlar kelganda ham
+                  sayt qotmaydi, har bir talaba javobi xavfsiz saqlanadi.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
+
+      <Footer />
     </div>
   );
 }
