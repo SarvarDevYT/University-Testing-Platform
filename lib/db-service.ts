@@ -375,12 +375,16 @@ export const dbService = {
     return user;
   },
 
-  // Talabani o'chirish
+  // Talabani o'chirish (Natijalari bilan birga to'liq tozalash)
   async deleteStudent(userId: string) {
     if (await checkPostgres()) {
-      return await prisma.user.delete({
-        where: { id: userId },
-      });
+      try {
+        await prisma.testResult.deleteMany({ where: { userId } });
+        await prisma.user.delete({ where: { id: userId } });
+        return true;
+      } catch (err) {
+        console.error("Postgres deleteStudent error:", err);
+      }
     }
     const store = readLocalStore();
     store.users = store.users.filter((u) => u.id !== userId);
@@ -556,12 +560,17 @@ export const dbService = {
     return null;
   },
 
-  // Testni o'chirish
+  // Testni o'chirish (Savollari va natijalari bilan bazadan to'liq tozalash)
   async deleteTest(id: string) {
     if (await checkPostgres()) {
-      return await prisma.test.delete({
-        where: { id },
-      });
+      try {
+        await prisma.testResult.deleteMany({ where: { testId: id } });
+        await prisma.question.deleteMany({ where: { testId: id } });
+        await prisma.test.delete({ where: { id } });
+        return true;
+      } catch (err) {
+        console.error("Postgres deleteTest error:", err);
+      }
     }
 
     const store = readLocalStore();
