@@ -44,17 +44,6 @@ export default function LoginPage() {
     }
   };
 
-  // Demo hisob bilan tez to'ldirish
-  const fillDemo = (role: "admin" | "student") => {
-    if (role === "admin") {
-      setUsername("adminuniver");
-      setPassword("universityadminuz");
-    } else {
-      setUsername("talaba2026");
-      setPassword("admin123");
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0B132B] px-4 py-12 relative overflow-hidden">
       {/* Orqa fon nur effekti */}
@@ -147,32 +136,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo hisoblar tezkor tugmalari */}
-          <div className="mt-8 pt-6 border-t border-white/10">
-            <div className="text-center text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">
-              Tezkor sinab ko&apos;rish uchun (Demo)
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => fillDemo("admin")}
-                className="px-3 py-2 rounded-lg bg-[#1C2541] hover:bg-[#253259] border border-white/10 text-xs text-indigo-300 font-medium transition-all text-center"
-              >
-                👑 Admin (adminuniver)
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemo("student")}
-                className="px-3 py-2 rounded-lg bg-[#1C2541] hover:bg-[#253259] border border-white/10 text-xs text-cyan-300 font-medium transition-all text-center"
-              >
-                🎓 Talaba (talaba2026)
-              </button>
-            </div>
-            <p className="text-[11px] text-slate-500 text-center mt-3">
-              (Boshlang&apos;ich demo parol: <strong className="text-slate-400">admin123</strong>)
-            </p>
-          </div>
         </div>
       </div>
     </div>
