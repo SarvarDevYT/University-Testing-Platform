@@ -14,6 +14,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { formatDate } from "@/lib/format";
 
 export default function ExamResultPage({
   params,
@@ -175,9 +176,9 @@ export default function ExamResultPage({
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-slate-400">Sana</div>
-              <div className="font-bold text-slate-300 mt-0.5">
-                {new Date(result.createdAt).toLocaleDateString("uz-UZ")}
+              <div className="text-[10px] text-slate-400">Sana (Kun:Oy:Yil)</div>
+              <div className="font-bold text-slate-200 mt-0.5 font-mono">
+                {formatDate(result.createdAt)}
               </div>
             </div>
           </div>

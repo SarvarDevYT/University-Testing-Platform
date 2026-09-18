@@ -15,6 +15,7 @@ import {
   User,
   ExternalLink,
 } from "lucide-react";
+import { formatDate } from "@/lib/format";
 
 export default function StudentDashboardPage() {
   const router = useRouter();
@@ -246,8 +247,8 @@ export default function StudentDashboardPage() {
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4 text-slate-400">
-                          {new Date(r.createdAt).toLocaleDateString("uz-UZ")}
+                        <td className="px-6 py-4 text-slate-400 font-mono">
+                          {formatDate(r.createdAt)}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <Link

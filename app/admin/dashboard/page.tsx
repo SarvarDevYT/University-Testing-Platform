@@ -10,9 +10,8 @@ import {
   UserPlus,
   PlusCircle,
   ArrowUpRight,
-  Clock,
-  Award,
 } from "lucide-react";
+import { formatDateTime } from "@/lib/format";
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<any>({
@@ -49,7 +48,7 @@ export default function AdminDashboardPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/admin/students"
-            className="px-4 py-2.5 rounded-xl bg-[#1C2541] hover:bg-[#253259] text-cyan-300 border border-white/10 hover:border-cyan-500/30 text-xs font-semibold flex items-center gap-2 transition-all"
+            className="px-4 py-2.5 rounded-xl bg-[#1A1F2C] hover:bg-[#232938] text-emerald-300 border border-white/10 hover:border-emerald-500/30 text-xs font-semibold flex items-center gap-2 transition-all"
           >
             <UserPlus className="w-4 h-4" />
             <span>Talaba qo&apos;shish</span>
@@ -57,7 +56,7 @@ export default function AdminDashboardPage() {
 
           <Link
             href="/admin/tests"
-            className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-indigo-600/30 transition-all"
+            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-2 shadow-md shadow-emerald-600/30 transition-all"
           >
             <PlusCircle className="w-4 h-4" />
             <span>Yangi test yaratish</span>
@@ -71,7 +70,7 @@ export default function AdminDashboardPage() {
         <div className="glass-panel p-6 rounded-2xl border border-white/10 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Jami Talabalar</span>
-            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
           </div>
@@ -81,7 +80,7 @@ export default function AdminDashboardPage() {
             </span>
             <span className="text-xs text-slate-400">nafar</span>
           </div>
-          <div className="mt-3 text-[11px] text-cyan-400 flex items-center gap-1 font-medium">
+          <div className="mt-3 text-[11px] text-emerald-400 flex items-center gap-1 font-medium">
             <span>Login va paroli mavjud talabalar</span>
           </div>
         </div>
@@ -90,7 +89,7 @@ export default function AdminDashboardPage() {
         <div className="glass-panel p-6 rounded-2xl border border-white/10 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Mavjud Testlar</span>
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-teal-500/15 text-teal-400 flex items-center justify-center">
               <FileQuestion className="w-5 h-5" />
             </div>
           </div>
@@ -109,7 +108,7 @@ export default function AdminDashboardPage() {
         <div className="glass-panel p-6 rounded-2xl border border-white/10 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Topshirilgan Testlar</span>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center">
               <FileCheck className="w-5 h-5" />
             </div>
           </div>
@@ -119,16 +118,16 @@ export default function AdminDashboardPage() {
             </span>
             <span className="text-xs text-slate-400">marta</span>
           </div>
-          <div className="mt-3 text-[11px] text-emerald-400 font-medium">
+          <div className="mt-3 text-[11px] text-amber-400 font-medium">
             Avtomatik baholangan
           </div>
         </div>
 
-        {/* O'rtacha o'zlashtirish */}
+        {/* Platforma Holati */}
         <div className="glass-panel p-6 rounded-2xl border border-white/10 relative overflow-hidden">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-400">Platforma Holati</span>
-            <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-slate-700/30 text-emerald-400 flex items-center justify-center">
               <TrendingUp className="w-5 h-5" />
             </div>
           </div>
@@ -155,7 +154,7 @@ export default function AdminDashboardPage() {
           </div>
           <Link
             href="/admin/results"
-            className="text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
+            className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition-colors"
           >
             <span>Barchasini ko&apos;rish</span>
             <ArrowUpRight className="w-4 h-4" />
@@ -169,14 +168,14 @@ export default function AdminDashboardPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#0A1024] text-slate-400 uppercase tracking-wider text-[10px] font-semibold border-b border-white/5">
+              <thead className="bg-[#0A0C12] text-slate-400 uppercase tracking-wider text-[10px] font-semibold border-b border-white/5">
                 <tr>
                   <th className="px-6 py-3.5">Talaba</th>
                   <th className="px-6 py-3.5">Guruh / Fakultet</th>
                   <th className="px-6 py-3.5">Test Nomi</th>
                   <th className="px-6 py-3.5">Ball / Foiz</th>
                   <th className="px-6 py-3.5">Holat</th>
-                  <th className="px-6 py-3.5">Sana</th>
+                  <th className="px-6 py-3.5">Sana (Kun:Oy:Yil)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-slate-300">
@@ -208,13 +207,8 @@ export default function AdminDashboardPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-slate-400">
-                      {new Date(res.createdAt).toLocaleDateString("uz-UZ", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        month: "numeric",
-                        day: "numeric",
-                      })}
+                    <td className="px-6 py-4 text-slate-400 font-mono">
+                      {formatDateTime(res.createdAt)}
                     </td>
                   </tr>
                 ))}

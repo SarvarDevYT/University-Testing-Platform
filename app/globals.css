@@ -1,27 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --primary-navy: #0B132B;
-  --primary-dark: #1C2541;
-  --accent-blue: #3A506B;
-  --brand-indigo: #4F46E5;
-  --brand-cyan: #06D6A0;
+  --bg-main: #0C0E14;
+  --bg-surface: #141822;
+  --bg-card: #1A1F2C;
+  --accent-emerald: #10B981;
+  --accent-emerald-dark: #059669;
+  --accent-amber: #F59E0B;
+  --accent-teal: #14B8A6;
 }
 
 body {
-  background-color: #0B132B;
-  color: #F8FAFC;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  background-color: #0C0E14;
+  color: #F1F5F9;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Glassmorphism kartochkalar */
+/* Premium ilmiy glassmorphism kartalar */
 .glass-panel {
-  background: rgba(28, 37, 65, 0.7);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 24, 34, 0.75);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .glass-card-hover {
@@ -30,30 +32,30 @@ body {
 
 .glass-card-hover:hover {
   transform: translateY(-3px);
-  border-color: rgba(99, 102, 241, 0.4);
-  box-shadow: 0 12px 30px -10px rgba(79, 70, 229, 0.25);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 14px 35px -10px rgba(16, 185, 129, 0.15);
 }
 
-/* Maxsus scrollbar */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B132B;
+  background: #0C0E14;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3A506B;
+  background: #232938;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4F46E5;
+  background: #10B981;
 }
 
-/* Natijani chop etish (Print / PDF) uchun maxsus qoidalar */
+/* Print / PDF xususiyatlari */
 @media print {
   body {
     background: #ffffff !important;
@@ -67,7 +69,7 @@ body {
   }
   .glass-panel {
     background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid #cbd5e1 !important;
     color: #000000 !important;
     box-shadow: none !important;
   }

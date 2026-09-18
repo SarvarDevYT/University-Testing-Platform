@@ -13,6 +13,7 @@ import {
   Award,
 } from "lucide-react";
 import * as XLSX from "xlsx";
+import { formatDateTime } from "@/lib/format";
 
 export default function AdminResultsPage() {
   const [results, setResults] = useState<any[]>([]);
@@ -48,7 +49,7 @@ export default function AdminResultsPage() {
       "To'plangan Ball (%)": `${r.scorePercent}%`,
       "Natija": r.passed ? "O'tdi" : "O'tmadi",
       "Sarflangan Vaqt (soniya)": `${r.timeSpentSeconds} sek`,
-      "Topshirilgan Vaqt": new Date(r.createdAt).toLocaleString("uz-UZ"),
+      "Topshirilgan Vaqt (Kun:Oy:Yil)": formatDateTime(r.createdAt),
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -207,13 +208,8 @@ export default function AdminResultsPage() {
                     <td className="px-6 py-4 text-slate-400">
                       {Math.floor(r.timeSpentSeconds / 60)} daq {r.timeSpentSeconds % 60} sek
                     </td>
-                    <td className="px-6 py-4 text-slate-400">
-                      {new Date(r.createdAt).toLocaleString("uz-UZ", {
-                        month: "numeric",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <td className="px-6 py-4 text-slate-400 font-mono">
+                      {formatDateTime(r.createdAt)}
                     </td>
                   </tr>
                 ))}

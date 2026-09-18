@@ -14,6 +14,7 @@ import {
   X,
   GraduationCap,
 } from "lucide-react";
+import { formatDate } from "@/lib/format";
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -269,8 +270,8 @@ export default function AdminStudentsPage() {
                         {student._count?.results || 0} ta
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-400">
-                      {new Date(student.createdAt).toLocaleDateString("uz-UZ")}
+                    <td className="px-6 py-4 text-slate-400 font-mono">
+                      {formatDate(student.createdAt)}
                     </td>
                     <td className="px-6 py-4 text-right space-x-2">
                       <button

@@ -18,10 +18,10 @@ export default function QuickJoinForm() {
   return (
     <form
       onSubmit={handleJoin}
-      className="glass-panel p-2.5 sm:p-3 rounded-2xl flex flex-col sm:flex-row items-center gap-2 border border-cyan-500/20 shadow-xl shadow-cyan-950/20"
+      className="glass-panel p-2.5 sm:p-3 rounded-2xl flex flex-col sm:flex-row items-center gap-2 border border-emerald-500/25 shadow-xl shadow-emerald-950/20"
     >
       <div className="flex items-center gap-3 px-3 w-full sm:w-auto flex-1">
-        <KeyRound className="w-5 h-5 text-cyan-400 shrink-0" />
+        <KeyRound className="w-5 h-5 text-emerald-400 shrink-0" />
         <input
           type="text"
           value={code}
@@ -33,7 +33,7 @@ export default function QuickJoinForm() {
       </div>
       <button
         type="submit"
-        className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
+        className="w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-md transition-all flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer"
       >
         <span>Testga kirish</span>
         <ArrowRight className="w-3.5 h-3.5" />

@@ -15,6 +15,7 @@ import {
   X,
   ShieldCheck,
 } from "lucide-react";
+import { formatDate } from "@/lib/format";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -50,9 +51,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B132B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0C0E14] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-3 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <div className="w-10 h-10 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
           <p className="text-xs text-slate-400">Admin panel yuklanmoqda...</p>
         </div>
       </div>
@@ -83,17 +84,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B132B] flex flex-col md:flex-row text-slate-100">
+    <div className="min-h-screen bg-[#0C0E14] flex flex-col md:flex-row text-slate-100">
       {/* SIDEBAR (Desktop) */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#080E21] border-r border-white/10 shrink-0">
+      <aside className="hidden md:flex flex-col w-64 bg-[#0A0C12] border-r border-white/10 shrink-0">
         <div className="p-5 border-b border-white/10">
           <Link href="/admin/dashboard" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center shadow-md">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-md">
               <GraduationCap className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="font-bold text-sm text-white tracking-wide">
-                UNIVER <span className="text-cyan-400">CRM</span>
+                UNIVER <span className="text-emerald-400">CRM</span>
               </div>
               <div className="text-[10px] text-slate-400 font-medium">Boshqaruv Tizimi</div>
             </div>
@@ -114,8 +115,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 href={item.href}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                    : "text-slate-300 hover:bg-[#1C2541] hover:text-white"
+                    ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30"
+                    : "text-slate-300 hover:bg-[#141822] hover:text-white"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -130,7 +131,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-slate-400 hover:bg-[#1C2541] hover:text-cyan-300 transition-colors"
+            className="flex items-center justify-between px-3 py-2 rounded-lg text-xs text-slate-400 hover:bg-[#141822] hover:text-emerald-300 transition-colors"
           >
             <span className="flex items-center gap-2">
               <ExternalLink className="w-3.5 h-3.5" />
@@ -149,9 +150,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* MOBILE HEADER */}
-      <div className="md:hidden flex items-center justify-between p-4 bg-[#080E21] border-b border-white/10">
+      <div className="md:hidden flex items-center justify-between p-4 bg-[#0A0C12] border-b border-white/10">
         <Link href="/admin/dashboard" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center">
             <GraduationCap className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold text-sm text-white">UNIVER CRM</span>
@@ -166,7 +167,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* MOBILE NAV DROPDOWN */}
       {mobileNavOpen && (
-        <div className="md:hidden bg-[#0F172A] border-b border-white/10 p-4 space-y-2">
+        <div className="md:hidden bg-[#141822] border-b border-white/10 p-4 space-y-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -176,7 +177,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 href={item.href}
                 onClick={() => setMobileNavOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium ${
-                  isActive ? "bg-indigo-600 text-white" : "text-slate-300"
+                  isActive ? "bg-emerald-600 text-white" : "text-slate-300"
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -196,24 +197,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Navbar */}
-        <header className="hidden md:flex items-center justify-between px-8 py-4 bg-[#080E21]/50 border-b border-white/5 backdrop-blur-md">
+        <header className="hidden md:flex items-center justify-between px-8 py-4 bg-[#0A0C12]/60 border-b border-white/5 backdrop-blur-md">
           <div className="flex items-center gap-2 text-xs text-slate-400">
-            <ShieldCheck className="w-4 h-4 text-cyan-400" />
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>Universitet Administratori: <strong className="text-white">{user?.fullName}</strong></span>
           </div>
 
           <div className="flex items-center gap-4 text-xs">
-            <span className="px-2.5 py-1 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/20 font-semibold">
+            <span className="px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/20 font-semibold">
               Neon Serverless Postgres
             </span>
-            <span className="text-slate-400">
-              {new Date().toLocaleDateString("uz-UZ", { month: "long", day: "numeric", year: "numeric" })}
+            <span className="text-slate-400 font-mono">
+              {formatDate(new Date())}
             </span>
           </div>
         </header>
 
-        {/* Page children */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           {children}
         </main>

@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   Award,
   ArrowRight,
-  FileSpreadsheet,
   Brain,
   GraduationCap,
   Sparkles,
@@ -24,27 +23,27 @@ export default async function HomePage() {
   const tests = await dbService.getTests(true);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#0B132B]">
+    <div className="min-h-screen flex flex-col bg-[#0C0E14]">
       <Navbar />
 
       <main className="flex-grow pt-20">
         {/* HERO SECTION */}
         <section id="hero" className="relative overflow-hidden pt-14 pb-20 md:pt-24 md:pb-32">
-          {/* Orqa fon nur effekti */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-3xl pointer-events-none -z-10" />
-          <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+          {/* Orqa fon nur effekti (Zumrad va Qahrabo) */}
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
+          <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none -z-10" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-950/60 border border-indigo-500/30 text-xs font-semibold text-cyan-300 mb-6 backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-xs font-semibold text-emerald-300 mb-6 backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
               <span>Universitet uchun 100% Bepul va Ommaviy Test Tizimi</span>
             </div>
 
             {/* Sarlavha */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight md:leading-[1.15]">
               Yagona havola orqali{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-indigo-200">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300">
                 1000+ talabadan
               </span>{" "}
               bir vaqtda test oling
@@ -61,14 +60,14 @@ export default async function HomePage() {
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
                 href="#tests-catalog"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2"
               >
                 <span>Testlar katalogi</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/login"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-cyan-300 bg-[#1C2541]/80 hover:bg-[#1C2541] border border-white/10 hover:border-cyan-400/50 shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-amber-300 bg-[#1A1F2C] hover:bg-[#232938] border border-white/10 hover:border-amber-400/40 shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <span>CRM Admin Panel</span>
               </Link>
@@ -82,19 +81,19 @@ export default async function HomePage() {
             {/* Asosiy ko'rsatkichlar */}
             <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
               <div className="glass-panel p-5 rounded-2xl">
-                <div className="text-3xl font-extrabold text-cyan-400">1000+</div>
+                <div className="text-3xl font-extrabold text-emerald-400">1000+</div>
                 <div className="text-xs text-slate-400 mt-1 font-medium">Bir vaqtda talaba</div>
               </div>
               <div className="glass-panel p-5 rounded-2xl">
-                <div className="text-3xl font-extrabold text-indigo-400">100%</div>
+                <div className="text-3xl font-extrabold text-teal-400">100%</div>
                 <div className="text-xs text-slate-400 mt-1 font-medium">Avto-baholash va aniqlik</div>
               </div>
               <div className="glass-panel p-5 rounded-2xl">
-                <div className="text-3xl font-extrabold text-emerald-400">0 soniya</div>
+                <div className="text-3xl font-extrabold text-amber-400">0 soniya</div>
                 <div className="text-xs text-slate-400 mt-1 font-medium">Kutish va qotishlarsiz</div>
               </div>
               <div className="glass-panel p-5 rounded-2xl">
-                <div className="text-3xl font-extrabold text-amber-400">Excel / PDF</div>
+                <div className="text-3xl font-extrabold text-slate-200">Excel / PDF</div>
                 <div className="text-xs text-slate-400 mt-1 font-medium">Tezkor hisobot eksporti</div>
               </div>
             </div>
@@ -102,11 +101,11 @@ export default async function HomePage() {
         </section>
 
         {/* TESTLAR KATALOGI */}
-        <section id="tests-catalog" className="py-16 md:py-24 bg-[#0E1736] border-y border-white/5">
+        <section id="tests-catalog" className="py-16 md:py-24 bg-[#10141D] border-y border-white/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
               <div>
-                <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+                <div className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
                   Diagnostika va Sinov
                 </div>
                 <h2 className="text-3xl font-extrabold text-white">
@@ -130,7 +129,7 @@ export default async function HomePage() {
                 </p>
                 <Link
                   href="/login"
-                  className="mt-4 inline-block px-5 py-2.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold"
+                  className="mt-4 inline-block px-5 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold"
                 >
                   Admin bo&apos;lib kirish
                 </Link>
@@ -142,11 +141,11 @@ export default async function HomePage() {
                     key={test.id}
                     className="glass-panel rounded-2xl p-6 flex flex-col justify-between glass-card-hover group border border-white/5 relative overflow-hidden"
                   >
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-indigo-500/10 to-transparent rounded-bl-full pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-emerald-500/10 to-transparent rounded-bl-full pointer-events-none" />
 
                     <div>
                       <div className="flex items-center justify-between mb-3">
-                        <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-indigo-950/80 text-cyan-300 border border-indigo-500/20">
+                        <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-950 text-emerald-300 border border-emerald-500/25">
                           {test.category}
                         </span>
                         <div className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
@@ -155,7 +154,7 @@ export default async function HomePage() {
                         </div>
                       </div>
 
-                      <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors line-clamp-2 mt-1">
+                      <h3 className="text-lg font-bold text-white group-hover:text-emerald-300 transition-colors line-clamp-2 mt-1">
                         {test.title}
                       </h3>
 
@@ -173,7 +172,7 @@ export default async function HomePage() {
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/exam/${test.accessCode}`}
-                          className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-center text-white bg-indigo-600 hover:bg-indigo-500 shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center gap-1.5"
+                          className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-center text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5"
                         >
                           <span>Testni boshlash</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -190,7 +189,7 @@ export default async function HomePage() {
         {/* QANDAY ISHLAYDI? */}
         <section id="how-it-works" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
-            <div className="text-cyan-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <div className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-2">
               Oddiy va Qulay
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white">
@@ -203,7 +202,7 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="glass-panel p-6 rounded-2xl relative">
-              <div className="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-extrabold text-lg mb-4">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-extrabold text-lg mb-4">
                 01
               </div>
               <h4 className="text-base font-bold text-white mb-2">Talaba hisobi yoki Link</h4>
@@ -213,7 +212,7 @@ export default async function HomePage() {
             </div>
 
             <div className="glass-panel p-6 rounded-2xl relative">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-extrabold text-lg mb-4">
+              <div className="w-12 h-12 rounded-xl bg-teal-500/15 border border-teal-500/30 text-teal-400 flex items-center justify-center font-extrabold text-lg mb-4">
                 02
               </div>
               <h4 className="text-base font-bold text-white mb-2">Testni Yechish</h4>
@@ -223,7 +222,7 @@ export default async function HomePage() {
             </div>
 
             <div className="glass-panel p-6 rounded-2xl relative">
-              <div className="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/30 text-purple-400 flex items-center justify-center font-extrabold text-lg mb-4">
+              <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center font-extrabold text-lg mb-4">
                 03
               </div>
               <h4 className="text-base font-bold text-white mb-2">Avtomatik Baholash</h4>
@@ -233,7 +232,7 @@ export default async function HomePage() {
             </div>
 
             <div className="glass-panel p-6 rounded-2xl relative">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-extrabold text-lg mb-4">
+              <div className="w-12 h-12 rounded-xl bg-slate-700/30 border border-slate-600 text-slate-300 flex items-center justify-center font-extrabold text-lg mb-4">
                 04
               </div>
               <h4 className="text-base font-bold text-white mb-2">CRM Hisoboti va Excel</h4>
@@ -245,7 +244,7 @@ export default async function HomePage() {
         </section>
 
         {/* AFZALLIKLAR SECTION */}
-        <section id="features" className="py-20 bg-[#0E1736] border-t border-white/5">
+        <section id="features" className="py-20 bg-[#10141D] border-t border-white/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="text-3xl font-extrabold text-white">
@@ -258,7 +257,7 @@ export default async function HomePage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="glass-panel p-7 rounded-2xl">
-                <div className="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mb-5">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-5">
                   <Users className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Talabalar CRM Boshqaruvi</h3>
@@ -269,7 +268,7 @@ export default async function HomePage() {
               </div>
 
               <div className="glass-panel p-7 rounded-2xl">
-                <div className="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 flex items-center justify-center mb-5">
+                <div className="w-12 h-12 rounded-xl bg-teal-500/15 border border-teal-500/30 text-teal-400 flex items-center justify-center mb-5">
                   <QrCode className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Ommaviy Havola va QR-Kod</h3>
@@ -280,7 +279,7 @@ export default async function HomePage() {
               </div>
 
               <div className="glass-panel p-7 rounded-2xl">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mb-5">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mb-5">
                   <Zap className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Neon Cloud & Yuqori Tezlik</h3>
