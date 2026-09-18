@@ -2,6 +2,7 @@ import prisma from "./prisma";
 import { hashPassword } from "./auth";
 import fs from "fs";
 import path from "path";
+import os from "os";
 
 export interface UserDTO {
   id: string;
@@ -64,9 +65,8 @@ export interface TestResultDTO {
 }
 
 // Lokal fayl bazasi (agar Neon DB hali ulanmagan bo'lsa avtomatik zaxira)
-// Lokal fayl bazasi (agar Neon DB hali ulanmagan bo'lsa avtomatik zaxira)
 const LOCAL_DATA_FILE = path.join(process.cwd(), "prisma", "local_backup_store.json");
-const TMP_DATA_FILE = path.join("/tmp", "local_backup_store.json");
+const TMP_DATA_FILE = path.join(os.tmpdir(), "local_backup_store.json");
 
 function getLocalDataFilePath(): string {
   try {
