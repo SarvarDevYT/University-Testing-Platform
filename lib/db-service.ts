@@ -78,8 +78,8 @@ function getInitialStore(): StoreData {
     users: [
       {
         id: "admin-1",
-        username: "admin",
-        password: "$2b$10$.WHeHuVNw6X3R0tH.FzRQehbf6asiLfpJvYvbiFJditSNB92lAM/q", // admin123
+        username: "adminuniver",
+        password: "$2b$10$4TvrJV1wfqtw6FmjKdWlE..XwiL2dzuKeRrocgdRwvyoJ2Tixy2DW", // universityadminuz
         fullName: "Universitet Bosh Administratori",
         role: "ADMIN",
         faculty: "Rektorat",

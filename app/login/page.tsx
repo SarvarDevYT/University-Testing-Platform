@@ -47,8 +47,8 @@ export default function LoginPage() {
   // Demo hisob bilan tez to'ldirish
   const fillDemo = (role: "admin" | "student") => {
     if (role === "admin") {
-      setUsername("admin");
-      setPassword("admin123");
+      setUsername("adminuniver");
+      setPassword("universityadminuz");
     } else {
       setUsername("talaba2026");
       setPassword("admin123");
@@ -159,7 +159,7 @@ export default function LoginPage() {
                 onClick={() => fillDemo("admin")}
                 className="px-3 py-2 rounded-lg bg-[#1C2541] hover:bg-[#253259] border border-white/10 text-xs text-indigo-300 font-medium transition-all text-center"
               >
-                👑 Admin (admin)
+                👑 Admin (adminuniver)
               </button>
               <button
                 type="button"
