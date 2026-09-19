@@ -50,6 +50,15 @@ export async function POST(
     const studentName = currentUser ? currentUser.fullName : guestName.trim();
     const studentGroup = currentUser ? (currentUser.groupName || "") : (guestGroup?.trim() || "");
 
+    // Guruh bo'yicha dostupni tekshirish
+    const accessCheck = await dbService.isStudentAllowedForTest(actualTestId, studentGroup);
+    if (!accessCheck.allowed) {
+      return NextResponse.json(
+        { error: accessCheck.reason || "Ushbu testga sizning guruhingiz ruxsat etilmagan" },
+        { status: 403 }
+      );
+    }
+
     const result = await dbService.submitExam({
       testId: actualTestId,
       userId: currentUser?.id || null,

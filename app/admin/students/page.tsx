@@ -22,6 +22,8 @@ import { formatDate } from "@/lib/format";
 
 export default function AdminStudentsPage() {
   const [students, setStudents] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
+  const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("ALL");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -59,9 +61,14 @@ export default function AdminStudentsPage() {
 
   const fetchStudents = async () => {
     try {
-      const res = await fetch("/api/admin/students");
-      const data = await res.json();
+      const [studentsRes, groupsRes] = await Promise.all([
+        fetch("/api/admin/students"),
+        fetch("/api/admin/groups"),
+      ]);
+      const data = await studentsRes.json();
+      const groupsData = await groupsRes.json();
       if (data.students) setStudents(data.students);
+      if (groupsData.groups) setGroups(groupsData.groups);
     } catch (err) {
       console.error(err);
     } finally {
@@ -323,13 +330,22 @@ export default function AdminStudentsPage() {
   };
 
   // Filter
-  const filteredStudents = students.filter(
-    (s) =>
-      s.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-      s.username?.toLowerCase().includes(search.toLowerCase()) ||
-      s.groupName?.toLowerCase().includes(search.toLowerCase()) ||
-      s.faculty?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredStudents = students.filter((s) => {
+    const q = search.toLowerCase();
+    const matchSearch =
+      !search ||
+      s.fullName?.toLowerCase().includes(q) ||
+      s.username?.toLowerCase().includes(q) ||
+      s.groupName?.toLowerCase().includes(q) ||
+      s.faculty?.toLowerCase().includes(q);
+
+    const matchGroup =
+      selectedGroupFilter === "ALL" ||
+      (selectedGroupFilter === "NO_GROUP" && !s.groupName) ||
+      s.groupName?.toLowerCase() === selectedGroupFilter.toLowerCase();
+
+    return matchSearch && matchGroup;
+  });
 
   return (
     <div className="space-y-6">
@@ -375,23 +391,39 @@ export default function AdminStudentsPage() {
         </div>
       </div>
 
-      {/* Qidiruv va Statistik qator */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-            <Search className="w-4 h-4" />
+      {/* Qidiruv va Guruh Filteri */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-3 flex-1 max-w-xl">
+          <div className="relative w-full sm:flex-1">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <Search className="w-4 h-4" />
+            </div>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Ism, login yoki guruh bo'yicha qidiruv..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+            />
           </div>
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Ism, login yoki guruh bo'yicha qidiruv..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
-          />
+
+          <select
+            value={selectedGroupFilter}
+            onChange={(e) => setSelectedGroupFilter(e.target.value)}
+            className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs focus:outline-none focus:border-emerald-500"
+          >
+            <option value="ALL">Barcha guruhlar ({students.length})</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.name}>
+                {g.name} guruhi
+              </option>
+            ))}
+            <option value="NO_GROUP">Guruhsiz talabalar</option>
+          </select>
         </div>
 
         <div className="text-xs text-slate-400 self-end sm:self-auto">
-          Jami talabalar: <span className="text-white font-bold">{students.length}</span> ta
+          Ko&apos;rsatildi: <span className="text-white font-bold">{filteredStudents.length}</span> ta
         </div>
       </div>
 
@@ -733,11 +765,26 @@ export default function AdminStudentsPage() {
                     </label>
                     <input
                       type="text"
+                      list="existing-groups-list"
                       value={groupName}
-                      onChange={(e) => setGroupName(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setGroupName(val);
+                        const matched = groups.find((g: any) => g.name.toLowerCase() === val.trim().toLowerCase());
+                        if (matched && matched.faculty && !faculty) {
+                          setFaculty(matched.faculty);
+                        }
+                      }}
                       placeholder="Masalan: AT-21"
                       className="w-full px-3.5 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500"
                     />
+                    <datalist id="existing-groups-list">
+                      {groups.map((g: any) => (
+                        <option key={g.id} value={g.name}>
+                          {g.name} {g.faculty ? `(${g.faculty})` : ""}
+                        </option>
+                      ))}
+                    </datalist>
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">

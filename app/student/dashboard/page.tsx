@@ -14,6 +14,8 @@ import {
   BookOpen,
   User,
   ExternalLink,
+  Lock,
+  Users,
 } from "lucide-react";
 import { formatDate } from "@/lib/format";
 
@@ -155,46 +157,86 @@ export default function StudentDashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tests.map((test) => (
-                <div
-                  key={test.id}
-                  className="glass-panel p-6 rounded-2xl border border-white/10 flex flex-col justify-between hover:border-indigo-500/40 transition-all group"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2.5">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950 text-cyan-300 border border-indigo-500/30">
-                        {test.category}
-                      </span>
-                      <div className="text-xs text-slate-400 flex items-center gap-1 font-medium">
-                        <Clock className="w-3.5 h-3.5" />
-                        <span>{test.timeLimit} daqiqa</span>
+              {tests.map((test) => {
+                const isUniversal = !test.allowedGroups || test.allowedGroups.length === 0;
+                const isMyGroup = Boolean(user?.groupName && test.allowedGroups?.includes(user.groupName));
+                const isAllowed = isUniversal || isMyGroup;
+
+                return (
+                  <div
+                    key={test.id}
+                    className={`glass-panel p-6 rounded-2xl border transition-all flex flex-col justify-between ${
+                      isAllowed
+                        ? "border-white/10 hover:border-indigo-500/40"
+                        : "border-white/5 opacity-80"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-950 text-cyan-300 border border-indigo-500/30">
+                          {test.category}
+                        </span>
+                        <div className="text-xs text-slate-400 flex items-center gap-1 font-medium">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>{test.timeLimit} daqiqa</span>
+                        </div>
+                      </div>
+
+                      <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
+                        {test.title}
+                      </h3>
+
+                      <p className="text-xs text-slate-400 mt-2 line-clamp-2">
+                        {test.description || "Talabalarning bilimi va o'zlashtirishini baholash testi."}
+                      </p>
+
+                      {/* Guruh mavjudligi */}
+                      <div className="mt-3 pt-2 flex items-center gap-1.5 text-[11px]">
+                        {isUniversal ? (
+                          <span className="text-slate-400 flex items-center gap-1">
+                            <Users className="w-3 h-3 text-slate-400" />
+                            Barcha guruhlarga ochiq
+                          </span>
+                        ) : isMyGroup ? (
+                          <span className="text-emerald-400 font-semibold flex items-center gap-1">
+                            <Users className="w-3 h-3 text-emerald-400" />
+                            Sizning guruhingiz ({user.groupName}) uchun ochiq
+                          </span>
+                        ) : (
+                          <span className="text-amber-400 font-semibold flex items-center gap-1">
+                            <Lock className="w-3 h-3 text-amber-400" />
+                            Faqat: {test.allowedGroups.join(", ")} uchun
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <h3 className="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">
-                      {test.title}
-                    </h3>
+                    <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between">
+                      <span className="text-xs text-slate-400">
+                        O&apos;tish: <strong className="text-white">{test.passingScore}%</strong>
+                      </span>
 
-                    <p className="text-xs text-slate-400 mt-2 line-clamp-2">
-                      {test.description || "Talabalarning bilimi va o'zlashtirishini baholash testi."}
-                    </p>
+                      {isAllowed ? (
+                        <Link
+                          href={`/exam/${test.accessCode}`}
+                          className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all"
+                        >
+                          <span>Boshlash</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
+                      ) : (
+                        <span
+                          className="py-2 px-3 rounded-xl bg-white/5 text-slate-500 text-xs font-semibold flex items-center gap-1 cursor-not-allowed"
+                          title="Ushbu test sizning guruhingiz uchun mo'ljallanmagan"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          <span>Dostup yo&apos;q</span>
+                        </span>
+                      )}
+                    </div>
                   </div>
-
-                  <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between">
-                    <span className="text-xs text-slate-400">
-                      O&apos;tish: <strong className="text-white">{test.passingScore}%</strong>
-                    </span>
-
-                    <Link
-                      href={`/exam/${test.accessCode}`}
-                      className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/20 transition-all"
-                    >
-                      <span>Boshlash</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

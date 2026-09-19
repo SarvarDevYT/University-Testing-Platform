@@ -9,6 +9,7 @@ import {
   Users,
   FileQuestion,
   FileCheck,
+  FolderKanban,
   LogOut,
   ExternalLink,
   Menu,
@@ -65,6 +66,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       name: "Boshqaruv Paneli",
       href: "/admin/dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      name: "Guruhlar Boshqaruvi",
+      href: "/admin/groups",
+      icon: FolderKanban,
     },
     {
       name: "Talabalar CRM",

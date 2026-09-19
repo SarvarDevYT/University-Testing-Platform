@@ -27,6 +27,22 @@ export async function GET(
     }
 
     const currentUser = await getCurrentUser();
+
+    // Guruh bo'yicha dostupni tekshirish
+    const accessCheck = await dbService.isStudentAllowedForTest(test.id, currentUser?.groupName);
+    if (!accessCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: accessCheck.reason,
+          groupRestricted: true,
+          allowedGroups: accessCheck.allowedGroups,
+          testTitle: test.title,
+          currentUser: currentUser ? { fullName: currentUser.fullName, groupName: currentUser.groupName } : null,
+        },
+        { status: 403 }
+      );
+    }
+
     let alreadySubmitted = false;
     if (currentUser) {
       alreadySubmitted = await dbService.hasStudentSubmitted(test.id, currentUser.id);

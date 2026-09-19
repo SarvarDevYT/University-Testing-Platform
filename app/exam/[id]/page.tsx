@@ -16,6 +16,8 @@ import {
   Check,
   ShieldAlert,
   EyeOff,
+  Lock,
+  Users,
 } from "lucide-react";
 
 export default function ExamPage({
@@ -31,6 +33,13 @@ export default function ExamPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
+  const [restrictedInfo, setRestrictedInfo] = useState<{
+    groupRestricted: boolean;
+    allowedGroups: string[];
+    testTitle?: string;
+    reason?: string;
+    currentUser?: { fullName: string; groupName?: string } | null;
+  } | null>(null);
 
   // Foydalanuvchi ma'lumotlari
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -61,6 +70,17 @@ export default function ExamPage({
         const testData = await testRes.json();
 
         if (!testRes.ok) {
+          if (testData.groupRestricted) {
+            setRestrictedInfo({
+              groupRestricted: true,
+              allowedGroups: testData.allowedGroups || [],
+              testTitle: testData.testTitle,
+              reason: testData.error,
+              currentUser: testData.currentUser,
+            });
+            setLoading(false);
+            return;
+          }
           throw new Error(testData.error || "Testni yuklab bo'lmadi");
         }
 
@@ -266,6 +286,86 @@ export default function ExamPage({
               className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold text-center transition-all"
             >
               Bosh Sahifa
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // AGAR TEST GURUH BO'YICHA CHEKLANGAN BO'LSA
+  if (restrictedInfo?.groupRestricted) {
+    return (
+      <div className="min-h-screen bg-[#0C0E14] flex items-center justify-center p-4">
+        <div className="glass-panel p-8 rounded-3xl max-w-md w-full text-center border border-amber-500/30 shadow-2xl relative overflow-hidden">
+          <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto mb-4 border border-amber-500/30">
+            <Lock className="w-7 h-7" />
+          </div>
+          <span className="inline-block px-3 py-1 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20 mb-2">
+            Maxsus Guruh Ruxsati Talab Qilinadi
+          </span>
+          <h2 className="text-xl font-bold text-white mb-2">
+            {restrictedInfo.testTitle || "Ushbu Test Cheklangan"}
+          </h2>
+          <p className="text-xs text-slate-300 mb-4 leading-relaxed">
+            {restrictedInfo.reason || "Ushbu test faqat ruxsat etilgan akademik guruh talabalari uchun ochiq."}
+          </p>
+
+          <div className="bg-black/40 border border-white/5 rounded-2xl p-4 mb-6 text-left">
+            <div className="text-[11px] font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-amber-400" />
+              Ruxsat berilgan guruhlar:
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {restrictedInfo.allowedGroups.length > 0 ? (
+                restrictedInfo.allowedGroups.map((grp) => (
+                  <span
+                    key={grp}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold"
+                  >
+                    {grp}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-slate-500 italic">Hech qaysi guruh biriktirilmagan</span>
+              )}
+            </div>
+
+            {restrictedInfo.currentUser ? (
+              <div className="mt-3 pt-3 border-t border-white/5 text-[11px] text-slate-400 flex justify-between items-center">
+                <span>Sizning guruhingiz:</span>
+                <span className="font-bold text-white">
+                  {restrictedInfo.currentUser.groupName || "Biriktirilmagan"}
+                </span>
+              </div>
+            ) : (
+              <div className="mt-3 pt-3 border-t border-white/5 text-[11px] text-amber-400/90">
+                Siz hozir tizimga kirmagansiz. Agar ushbu guruh talabasi bo&apos;lsangiz, avval tizimga kiring.
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2.5">
+            {!restrictedInfo.currentUser ? (
+              <Link
+                href={`/login?callbackUrl=/exam/${id}`}
+                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition-all text-center flex items-center justify-center gap-2"
+              >
+                Kabinetga Kirish
+              </Link>
+            ) : (
+              <Link
+                href="/student/dashboard"
+                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition-all text-center"
+              >
+                Talaba Kabinetiga Qaytish
+              </Link>
+            )}
+            <Link
+              href="/"
+              className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold text-center transition-all"
+            >
+              Bosh Sahifaga Qaytish
             </Link>
           </div>
         </div>

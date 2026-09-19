@@ -38,16 +38,29 @@ model Test {
   category     String       @default("Umumiy") // Masalan: "Matematika", "Psixodiagnostika", "Informatika"
   timeLimit    Int          @default(20) // daqiqalarda
   passingScore Int          @default(60) // o'tish bali (%)
-  isActive     Boolean      @default(true)
-  accessCode   String       @unique @default(uuid()) // Ommaviy havola (mass link / QR-kod) uchun
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  isActive      Boolean      @default(true)
+  accessCode    String       @unique @default(uuid()) // Ommaviy havola (mass link / QR-kod) uchun
+  allowedGroups String?      // Ruxsat berilgan guruhlar JSON ro'yxati (masalan: '["DI-210", "KI-104"]')
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   questions    Question[]
   results      TestResult[]
 
   @@index([accessCode])
   @@index([category])
+}
+
+// Akademik Guruhlar (Masalan: DI-210, KI-104)
+model Group {
+  id          String   @id @default(uuid())
+  name        String   @unique // Guruh nomi
+  faculty     String?  // Fakulteti
+  description String?  // Kursi yoki tavsifi
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([name])
 }
 
 // Savollar va Variantlar (A, B, C, D)

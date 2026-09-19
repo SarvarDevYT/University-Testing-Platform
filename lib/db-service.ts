@@ -29,6 +29,16 @@ export interface QuestionDTO {
   orderIndex: number;
 }
 
+export interface GroupDTO {
+  id: string;
+  name: string;
+  faculty?: string | null;
+  description?: string | null;
+  createdAt: Date;
+  studentCount?: number;
+  testCount?: number;
+}
+
 export interface TestDTO {
   id: string;
   title: string;
@@ -38,6 +48,7 @@ export interface TestDTO {
   passingScore: number;
   isActive: boolean;
   accessCode: string;
+  allowedGroups?: string[]; // Ruxsat berilgan guruhlar ro'yxati (masalan: ["DI-210", "KI-104"])
   createdAt: Date;
   questions?: QuestionDTO[];
   _count?: {
@@ -83,10 +94,25 @@ function getLocalDataFilePath(): string {
 
 interface StoreData {
   users: any[];
+  groups: any[];
   tests: any[];
   questions: any[];
   results: any[];
   deletedIds?: string[];
+}
+
+function parseAllowedGroups(raw: any): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      return raw.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
 }
 
 function getInitialStore(): StoreData {
@@ -104,6 +130,7 @@ function getInitialStore(): StoreData {
         createdAt: new Date().toISOString(),
       },
     ],
+    groups: [],
     tests: [],
     questions: [],
     results: [],
@@ -122,9 +149,11 @@ function readLocalStore(): StoreData {
     const content = fs.readFileSync(filePath, "utf-8");
     const parsed: StoreData = JSON.parse(content);
     if (!parsed.deletedIds) parsed.deletedIds = [];
+    if (!parsed.groups) parsed.groups = [];
 
     // O'chirilgan ID larni to'liq tozalash
     parsed.tests = (parsed.tests || []).filter((t: any) => !parsed.deletedIds?.includes(t.id));
+    parsed.groups = (parsed.groups || []).filter((g: any) => !parsed.deletedIds?.includes(g.id));
     parsed.users = (parsed.users || []).filter((u: any) => !parsed.deletedIds?.includes(u.id));
     parsed.questions = (parsed.questions || []).filter((q: any) => !parsed.deletedIds?.includes(q.id));
     parsed.results = (parsed.results || []).filter((r: any) => !parsed.deletedIds?.includes(r.id));
@@ -463,7 +492,7 @@ export const dbService = {
   // Barcha testlarni olish (Admin yoki Landing uchun)
   async getTests(onlyActive = false) {
     if (await checkPostgres()) {
-      return await prisma.test.findMany({
+      const tests = await prisma.test.findMany({
         where: onlyActive ? { isActive: true } : undefined,
         orderBy: { createdAt: "desc" },
         include: {
@@ -472,6 +501,10 @@ export const dbService = {
           },
         },
       });
+      return tests.map((t) => ({
+        ...t,
+        allowedGroups: parseAllowedGroups(t.allowedGroups),
+      }));
     }
 
     const store = readLocalStore();
@@ -482,6 +515,7 @@ export const dbService = {
 
     return list.map((t) => ({
       ...t,
+      allowedGroups: parseAllowedGroups(t.allowedGroups),
       createdAt: new Date(t.createdAt),
       _count: {
         questions: store.questions.filter((q) => q.testId === t.id).length,
@@ -508,7 +542,10 @@ export const dbService = {
           correctAnswer: "", // Talabaga to'g'ri javobni ko'rsatmaslik!
         }));
       }
-      return test;
+      return {
+        ...test,
+        allowedGroups: parseAllowedGroups(test.allowedGroups),
+      };
     }
 
     const store = readLocalStore();
@@ -525,7 +562,12 @@ export const dbService = {
         return q;
       });
 
-    return { ...test, questions, createdAt: new Date(test.createdAt) };
+    return {
+      ...test,
+      allowedGroups: parseAllowedGroups(test.allowedGroups),
+      questions,
+      createdAt: new Date(test.createdAt),
+    };
   },
 
   // Testni Ommaviy havola (accessCode) orqali olish
@@ -552,7 +594,10 @@ export const dbService = {
         ...q,
         correctAnswer: "", // xavfsizlik: to'g'ri javob yashiriladi
       }));
-      return test;
+      return {
+        ...test,
+        allowedGroups: parseAllowedGroups(test.allowedGroups),
+      };
     }
 
     const store = readLocalStore();
@@ -568,7 +613,12 @@ export const dbService = {
       .sort((a, b) => a.orderIndex - b.orderIndex)
       .map((q) => ({ ...q, correctAnswer: "" }));
 
-    return { ...test, questions, createdAt: new Date(test.createdAt) };
+    return {
+      ...test,
+      allowedGroups: parseAllowedGroups(test.allowedGroups),
+      questions,
+      createdAt: new Date(test.createdAt),
+    };
   },
 
   // Yangi test yaratish
@@ -579,11 +629,13 @@ export const dbService = {
     timeLimit: number;
     passingScore: number;
     isActive?: boolean;
+    allowedGroups?: string[];
   }) {
     const accessCode = "test-" + Math.random().toString(36).substring(2, 8);
+    const groupsList = data.allowedGroups || [];
 
     if (await checkPostgres()) {
-      return await prisma.test.create({
+      const created = await prisma.test.create({
         data: {
           title: data.title,
           description: data.description || null,
@@ -592,8 +644,10 @@ export const dbService = {
           passingScore: data.passingScore || 60,
           isActive: data.isActive !== undefined ? data.isActive : true,
           accessCode,
+          allowedGroups: groupsList.length > 0 ? JSON.stringify(groupsList) : null,
         },
       });
+      return { ...created, allowedGroups: groupsList };
     }
 
     const store = readLocalStore();
@@ -606,6 +660,7 @@ export const dbService = {
       passingScore: data.passingScore || 60,
       isActive: data.isActive !== undefined ? data.isActive : true,
       accessCode,
+      allowedGroups: groupsList,
       createdAt: new Date().toISOString(),
     };
     store.tests.push(newTest);
@@ -616,7 +671,7 @@ export const dbService = {
   // Testni yangilash
   async updateTest(id: string, data: Partial<TestDTO>) {
     if (await checkPostgres()) {
-      return await prisma.test.update({
+      const updated = await prisma.test.update({
         where: { id },
         data: {
           title: data.title,
@@ -625,14 +680,25 @@ export const dbService = {
           timeLimit: data.timeLimit,
           passingScore: data.passingScore,
           isActive: data.isActive,
+          allowedGroups: data.allowedGroups !== undefined
+            ? (data.allowedGroups.length > 0 ? JSON.stringify(data.allowedGroups) : null)
+            : undefined,
         },
       });
+      return {
+        ...updated,
+        allowedGroups: parseAllowedGroups(updated.allowedGroups),
+      };
     }
 
     const store = readLocalStore();
     const index = store.tests.findIndex((t) => t.id === id);
     if (index !== -1) {
-      store.tests[index] = { ...store.tests[index], ...data };
+      store.tests[index] = {
+        ...store.tests[index],
+        ...data,
+        allowedGroups: data.allowedGroups !== undefined ? data.allowedGroups : store.tests[index].allowedGroups,
+      };
       writeLocalStore(store);
       return store.tests[index];
     }
@@ -1048,5 +1114,406 @@ export const dbService = {
     }
     const store = readLocalStore();
     return store.results.some((r) => r.testId === testId && r.userId === userId);
+  },
+
+  // === GURUHLAR BOSHQARUVI (GROUPS CRM) ===
+  async getGroups(): Promise<GroupDTO[]> {
+    if (await checkPostgres()) {
+      const groups = await prisma.group.findMany({
+        orderBy: { name: "asc" },
+      });
+      const allStudents = await prisma.user.findMany({
+        where: { role: "STUDENT" },
+        select: { groupName: true },
+      });
+      const allTests = await prisma.test.findMany({
+        select: { allowedGroups: true },
+      });
+
+      return groups.map((g) => {
+        const studentCount = allStudents.filter(
+          (s) => s.groupName?.trim().toLowerCase() === g.name.trim().toLowerCase()
+        ).length;
+        const testCount = allTests.filter((t) => {
+          const parsed = parseAllowedGroups(t.allowedGroups);
+          return parsed.length === 0 || parsed.some((ag) => ag.toLowerCase() === g.name.toLowerCase());
+        }).length;
+
+        return {
+          id: g.id,
+          name: g.name,
+          faculty: g.faculty,
+          description: g.description,
+          createdAt: g.createdAt,
+          studentCount,
+          testCount,
+        };
+      });
+    }
+
+    const store = readLocalStore();
+    return (store.groups || []).map((g: any) => {
+      const studentCount = store.users.filter(
+        (u: any) => u.role === "STUDENT" && u.groupName?.trim().toLowerCase() === g.name.trim().toLowerCase()
+      ).length;
+      const testCount = store.tests.filter((t: any) => {
+        const parsed = parseAllowedGroups(t.allowedGroups);
+        return parsed.length === 0 || parsed.some((ag: string) => ag.toLowerCase() === g.name.toLowerCase());
+      }).length;
+
+      return {
+        id: g.id,
+        name: g.name,
+        faculty: g.faculty,
+        description: g.description,
+        createdAt: new Date(g.createdAt),
+        studentCount,
+        testCount,
+      };
+    }).sort((a: any, b: any) => a.name.localeCompare(b.name));
+  },
+
+  async getGroupById(id: string) {
+    let group: any = null;
+    let students: any[] = [];
+    let tests: any[] = [];
+
+    if (await checkPostgres()) {
+      group = await prisma.group.findUnique({ where: { id } });
+      if (!group) return null;
+      students = await prisma.user.findMany({
+        where: { role: "STUDENT", groupName: group.name },
+        select: {
+          id: true,
+          username: true,
+          fullName: true,
+          faculty: true,
+          groupName: true,
+          phone: true,
+          createdAt: true,
+        },
+        orderBy: { fullName: "asc" },
+      });
+      const allTests = await prisma.test.findMany({
+        orderBy: { createdAt: "desc" },
+      });
+      tests = allTests.map((t) => {
+        const parsed = parseAllowedGroups(t.allowedGroups);
+        return {
+          id: t.id,
+          title: t.title,
+          category: t.category,
+          isActive: t.isActive,
+          allowedGroups: parsed,
+          isAssigned: parsed.length === 0 || parsed.some((ag) => ag.toLowerCase() === group.name.toLowerCase()),
+        };
+      });
+    } else {
+      const store = readLocalStore();
+      group = (store.groups || []).find((g: any) => g.id === id);
+      if (!group) return null;
+      students = store.users
+        .filter((u: any) => u.role === "STUDENT" && u.groupName?.trim().toLowerCase() === group.name.trim().toLowerCase())
+        .map((u: any) => ({ ...u, password: undefined, createdAt: new Date(u.createdAt) }))
+        .sort((a: any, b: any) => a.fullName.localeCompare(b.fullName));
+      tests = store.tests.map((t: any) => {
+        const parsed = parseAllowedGroups(t.allowedGroups);
+        return {
+          id: t.id,
+          title: t.title,
+          category: t.category,
+          isActive: t.isActive,
+          allowedGroups: parsed,
+          createdAt: new Date(t.createdAt),
+          isAssigned: parsed.length === 0 || parsed.some((ag: string) => ag.toLowerCase() === group.name.toLowerCase()),
+        };
+      });
+    }
+
+    return {
+      group: {
+        ...group,
+        createdAt: new Date(group.createdAt),
+        studentCount: students.length,
+      },
+      students,
+      tests,
+    };
+  },
+
+  async createGroup(data: { name: string; faculty?: string; description?: string }) {
+    const cleanName = data.name.trim();
+    if (!cleanName) throw new Error("Guruh nomi kiritilishi shart");
+
+    if (await checkPostgres()) {
+      const existing = await prisma.group.findFirst({
+        where: { name: { equals: cleanName, mode: "insensitive" } },
+      });
+      if (existing) throw new Error("Ushbu nomdagi guruh allaqachon mavjud!");
+
+      return await prisma.group.create({
+        data: {
+          name: cleanName,
+          faculty: data.faculty?.trim() || null,
+          description: data.description?.trim() || null,
+        },
+      });
+    }
+
+    const store = readLocalStore();
+    if (!store.groups) store.groups = [];
+    const existing = store.groups.find((g: any) => g.name.toLowerCase() === cleanName.toLowerCase());
+    if (existing) throw new Error("Ushbu nomdagi guruh allaqachon mavjud!");
+
+    const newGroup = {
+      id: "grp-" + Date.now(),
+      name: cleanName,
+      faculty: data.faculty?.trim() || null,
+      description: data.description?.trim() || null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    store.groups.push(newGroup);
+    writeLocalStore(store);
+    return newGroup;
+  },
+
+  async updateGroup(id: string, data: { name?: string; faculty?: string; description?: string }) {
+    const store = readLocalStore();
+    let oldName = "";
+
+    if (await checkPostgres()) {
+      const current = await prisma.group.findUnique({ where: { id } });
+      if (!current) throw new Error("Guruh topilmadi");
+      oldName = current.name;
+
+      const cleanName = data.name ? data.name.trim() : oldName;
+      if (cleanName.toLowerCase() !== oldName.toLowerCase()) {
+        const existing = await prisma.group.findFirst({
+          where: { name: { equals: cleanName, mode: "insensitive" }, id: { not: id } },
+        });
+        if (existing) throw new Error("Bu nomdagi guruh allaqachon mavjud");
+      }
+
+      const updated = await prisma.group.update({
+        where: { id },
+        data: {
+          name: cleanName,
+          faculty: data.faculty !== undefined ? data.faculty?.trim() || null : current.faculty,
+          description: data.description !== undefined ? data.description?.trim() || null : current.description,
+        },
+      });
+
+      if (cleanName !== oldName) {
+        await prisma.user.updateMany({
+          where: { groupName: oldName },
+          data: { groupName: cleanName },
+        });
+      }
+
+      return updated;
+    }
+
+    const idx = (store.groups || []).findIndex((g: any) => g.id === id);
+    if (idx === -1) throw new Error("Guruh topilmadi");
+    oldName = store.groups[idx].name;
+    const cleanName = data.name ? data.name.trim() : oldName;
+
+    if (cleanName.toLowerCase() !== oldName.toLowerCase()) {
+      const existing = store.groups.find((g: any) => g.name.toLowerCase() === cleanName.toLowerCase() && g.id !== id);
+      if (existing) throw new Error("Bu nomdagi guruh allaqachon mavjud");
+    }
+
+    store.groups[idx] = {
+      ...store.groups[idx],
+      name: cleanName,
+      faculty: data.faculty !== undefined ? data.faculty?.trim() || null : store.groups[idx].faculty,
+      description: data.description !== undefined ? data.description?.trim() || null : store.groups[idx].description,
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (cleanName !== oldName) {
+      store.users.forEach((u: any) => {
+        if (u.groupName === oldName) u.groupName = cleanName;
+      });
+      store.tests.forEach((t: any) => {
+        if (t.allowedGroups && Array.isArray(t.allowedGroups)) {
+          t.allowedGroups = t.allowedGroups.map((g: string) => g === oldName ? cleanName : g);
+        }
+      });
+    }
+
+    writeLocalStore(store);
+    return store.groups[idx];
+  },
+
+  async deleteGroup(id: string) {
+    if (await checkPostgres()) {
+      try {
+        const group = await prisma.group.findUnique({ where: { id } });
+        if (group) {
+          await prisma.group.delete({ where: { id } }).catch(console.warn);
+        }
+      } catch (err) {
+        console.error("deleteGroup postgres error:", err);
+      }
+    }
+
+    const store = readLocalStore();
+    const group = (store.groups || []).find((g: any) => g.id === id);
+    if (group) {
+      const gName = group.name;
+      store.groups = store.groups.filter((g: any) => g.id !== id);
+      store.tests.forEach((t: any) => {
+        if (t.allowedGroups && Array.isArray(t.allowedGroups)) {
+          t.allowedGroups = t.allowedGroups.filter((name: string) => name !== gName);
+        }
+      });
+      if (!store.deletedIds) store.deletedIds = [];
+      if (!store.deletedIds.includes(id)) store.deletedIds.push(id);
+      writeLocalStore(store);
+    }
+    return true;
+  },
+
+  // Talabalarni guruhga biriktirish
+  async assignStudentsToGroup(groupName: string, studentIds: string[]) {
+    if (await checkPostgres()) {
+      await prisma.user.updateMany({
+        where: { id: { in: studentIds } },
+        data: { groupName: groupName.trim() },
+      });
+      return true;
+    }
+
+    const store = readLocalStore();
+    store.users.forEach((u: any) => {
+      if (studentIds.includes(u.id)) {
+        u.groupName = groupName.trim();
+      }
+    });
+    writeLocalStore(store);
+    return true;
+  },
+
+  // Talabani guruhdan chiqarish
+  async removeStudentFromGroup(studentId: string) {
+    if (await checkPostgres()) {
+      await prisma.user.update({
+        where: { id: studentId },
+        data: { groupName: null },
+      });
+      return true;
+    }
+
+    const store = readLocalStore();
+    const user = store.users.find((u: any) => u.id === studentId);
+    if (user) {
+      user.groupName = null;
+      writeLocalStore(store);
+    }
+    return true;
+  },
+
+  // Guruhga testlarni biriktirish (Testlarning allowedGroups qatoriga qo'shish yoki olib tashlash)
+  async assignTestsToGroup(groupName: string, assignedTestIds: string[]) {
+    const gName = groupName.trim();
+
+    if (await checkPostgres()) {
+      const allTests = await prisma.test.findMany();
+      for (const t of allTests) {
+        let currentGroups = parseAllowedGroups(t.allowedGroups);
+        const shouldHave = assignedTestIds.includes(t.id);
+        const has = currentGroups.some((g) => g.toLowerCase() === gName.toLowerCase());
+
+        if (shouldHave && !has) {
+          currentGroups.push(gName);
+          await prisma.test.update({
+            where: { id: t.id },
+            data: { allowedGroups: JSON.stringify(currentGroups) },
+          });
+        } else if (!shouldHave && has) {
+          currentGroups = currentGroups.filter((g) => g.toLowerCase() !== gName.toLowerCase());
+          await prisma.test.update({
+            where: { id: t.id },
+            data: { allowedGroups: currentGroups.length > 0 ? JSON.stringify(currentGroups) : null },
+          });
+        }
+      }
+      return true;
+    }
+
+    const store = readLocalStore();
+    store.tests.forEach((t: any) => {
+      let currentGroups = parseAllowedGroups(t.allowedGroups);
+      const shouldHave = assignedTestIds.includes(t.id);
+      const has = currentGroups.some((g) => g.toLowerCase() === gName.toLowerCase());
+
+      if (shouldHave && !has) {
+        currentGroups.push(gName);
+        t.allowedGroups = currentGroups;
+      } else if (!shouldHave && has) {
+        currentGroups = currentGroups.filter((g) => g.toLowerCase() !== gName.toLowerCase());
+        t.allowedGroups = currentGroups;
+      }
+    });
+    writeLocalStore(store);
+    return true;
+  },
+
+  // Talabaning testga dostupini tekshirish
+  async isStudentAllowedForTest(testId: string, studentGroupName?: string | null): Promise<{
+    allowed: boolean;
+    reason?: string;
+    allowedGroups: string[];
+    testTitle?: string;
+  }> {
+    let allowedGroups: string[] = [];
+    let title = "";
+
+    if (await checkPostgres()) {
+      const test = await prisma.test.findUnique({
+        where: { id: testId },
+        select: { title: true, allowedGroups: true },
+      });
+      if (!test) return { allowed: false, reason: "Test topilmadi", allowedGroups: [] };
+      allowedGroups = parseAllowedGroups(test.allowedGroups);
+      title = test.title;
+    } else {
+      const store = readLocalStore();
+      const test = store.tests.find((t: any) => t.id === testId);
+      if (!test) return { allowed: false, reason: "Test topilmadi", allowedGroups: [] };
+      allowedGroups = parseAllowedGroups(test.allowedGroups);
+      title = test.title;
+    }
+
+    // Agar hech qanday guruh belgilanmagan bo'lsa -> test hamma uchun ochiq
+    if (allowedGroups.length === 0) {
+      return { allowed: true, allowedGroups: [], testTitle: title };
+    }
+
+    // Agar aniq guruhlar belgilangan bo'lsa, talaba guruhi tekshiriladi
+    if (!studentGroupName || !studentGroupName.trim()) {
+      return {
+        allowed: false,
+        reason: "Ushbu test faqat belgilangan guruhlar uchun ochiq! Tizimga o'z guruhingiz bilan kiring.",
+        allowedGroups,
+        testTitle: title,
+      };
+    }
+
+    const cleanStudentGroup = studentGroupName.trim().toLowerCase();
+    const isMatched = allowedGroups.some((g) => g.trim().toLowerCase() === cleanStudentGroup);
+
+    if (isMatched) {
+      return { allowed: true, allowedGroups, testTitle: title };
+    }
+
+    return {
+      allowed: false,
+      reason: `Sizning guruhingiz (${studentGroupName}) ushbu testga ruxsat etilmagan. Ruxsat berilgan guruhlar: ${allowedGroups.join(", ")}`,
+      allowedGroups,
+      testTitle: title,
+    };
   },
 };
