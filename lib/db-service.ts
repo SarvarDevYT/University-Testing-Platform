@@ -87,11 +87,6 @@ interface StoreData {
   questions: any[];
   results: any[];
   deletedIds?: string[];
-  settings?: {
-    telegramBotToken?: string;
-    telegramChatId?: string;
-    telegramEnabled?: boolean;
-  };
 }
 
 function getInitialStore(): StoreData {
@@ -113,11 +108,6 @@ function getInitialStore(): StoreData {
     questions: [],
     results: [],
     deletedIds: [],
-    settings: {
-      telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || "",
-      telegramChatId: process.env.TELEGRAM_CHAT_ID || "",
-      telegramEnabled: true,
-    },
   };
 }
 
@@ -1046,26 +1036,5 @@ export const dbService = {
     }
     const store = readLocalStore();
     return store.results.some((r) => r.testId === testId && r.userId === userId);
-  },
-
-  // Telegram bot sozlamalari
-  async getTelegramSettings() {
-    const store = readLocalStore();
-    return {
-      botToken: store.settings?.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN || "",
-      chatId: store.settings?.telegramChatId || process.env.TELEGRAM_CHAT_ID || "",
-      enabled: store.settings?.telegramEnabled !== undefined ? store.settings.telegramEnabled : true,
-    };
-  },
-
-  async saveTelegramSettings(settings: { botToken: string; chatId: string; enabled: boolean }) {
-    const store = readLocalStore();
-    store.settings = {
-      telegramBotToken: settings.botToken.trim(),
-      telegramChatId: settings.chatId.trim(),
-      telegramEnabled: settings.enabled,
-    };
-    writeLocalStore(store);
-    return store.settings;
   },
 };
