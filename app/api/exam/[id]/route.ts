@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbService } from "@/lib/db-service";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function GET(
   req: NextRequest,
@@ -25,7 +26,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ test });
+    const currentUser = await getCurrentUser();
+    let alreadySubmitted = false;
+    if (currentUser) {
+      alreadySubmitted = await dbService.hasStudentSubmitted(test.id, currentUser.id);
+    }
+
+    return NextResponse.json({ test, alreadySubmitted, currentUser });
   } catch (error: any) {
     return NextResponse.json(
       { error: "Testni yuklashda xatolik yuz berdi" },

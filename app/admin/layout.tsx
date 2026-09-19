@@ -81,6 +81,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       href: "/admin/results",
       icon: FileCheck,
     },
+    {
+      name: "Telegram & Sozlamalar",
+      href: "/admin/settings",
+      icon: ShieldCheck,
+    },
   ];
 
   return (

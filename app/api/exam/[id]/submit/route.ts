@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { dbService } from "@/lib/db-service";
+import { sendTelegramResultNotification } from "@/lib/telegram";
 
 export async function POST(
   req: NextRequest,
@@ -36,14 +37,42 @@ export async function POST(
       return NextResponse.json({ error: "Test topilmadi" }, { status: 404 });
     }
 
+    // 1 ta urinish qoidasi (Anti-cheat): Tizimga kirgan talaba qayta topshira olmaydi
+    if (currentUser) {
+      const alreadySubmitted = await dbService.hasStudentSubmitted(actualTestId, currentUser.id);
+      if (alreadySubmitted) {
+        return NextResponse.json(
+          { error: "Siz ushbu testni allaqachon topshirgansiz! Qayta topshirish taqiqlangan." },
+          { status: 400 }
+        );
+      }
+    }
+
+    const studentName = currentUser ? currentUser.fullName : guestName.trim();
+    const studentGroup = currentUser ? (currentUser.groupName || "") : (guestGroup?.trim() || "");
+
     const result = await dbService.submitExam({
       testId: actualTestId,
       userId: currentUser?.id || null,
-      guestName: currentUser ? currentUser.fullName : guestName.trim(),
-      guestGroup: currentUser ? (currentUser.groupName || "") : (guestGroup?.trim() || ""),
+      guestName: studentName,
+      guestGroup: studentGroup,
       answers: answers || {},
       timeSpentSeconds: parseInt(timeSpentSeconds) || 0,
     });
+
+    // Telegram botga natijani avtomatik jo'natish (orqa fonda)
+    sendTelegramResultNotification({
+      studentName,
+      groupName: studentGroup,
+      faculty: currentUser?.faculty || null,
+      testTitle: test.title,
+      scorePercent: result.scorePercent,
+      correctAnswers: result.correctAnswers,
+      totalQuestions: result.totalQuestions,
+      passed: result.passed,
+      timeSpentSeconds: result.timeSpentSeconds,
+      submittedAt: new Date(),
+    }).catch(console.error);
 
     return NextResponse.json({
       success: true,

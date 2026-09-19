@@ -87,6 +87,11 @@ interface StoreData {
   questions: any[];
   results: any[];
   deletedIds?: string[];
+  settings?: {
+    telegramBotToken?: string;
+    telegramChatId?: string;
+    telegramEnabled?: boolean;
+  };
 }
 
 function getInitialStore(): StoreData {
@@ -108,6 +113,11 @@ function getInitialStore(): StoreData {
     questions: [],
     results: [],
     deletedIds: [],
+    settings: {
+      telegramBotToken: process.env.TELEGRAM_BOT_TOKEN || "",
+      telegramChatId: process.env.TELEGRAM_CHAT_ID || "",
+      telegramEnabled: true,
+    },
   };
 }
 
@@ -168,6 +178,25 @@ async function checkPostgres(): Promise<boolean> {
     isPostgresHealthy = false;
     return false;
   }
+}
+
+function generateSecurePassword(length = 8): string {
+  const chars = "abcdefghjkmnpqrstuvwxyz23456789ABCDEFGHJKMNPQRSTUVWXYZ";
+  let pass = "";
+  for (let i = 0; i < length; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pass;
+}
+
+function generateCleanUsername(fullName: string, index: number): string {
+  const clean = fullName
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/gi, "")
+    .trim()
+    .split(/\s+/)[0] || "std";
+  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+  return `${clean}${randomSuffix}`;
 }
 
 export const dbService = {
@@ -299,6 +328,106 @@ export const dbService = {
     store.users.push(newUser);
     writeLocalStore(store);
     return newUser;
+  },
+
+  // Ommaviy talabalarni Excel orqali qo'shish va avto login/parol yaratish
+  async importStudents(
+    students: Array<{
+      fullName: string;
+      groupName?: string;
+      faculty?: string;
+      phone?: string;
+      username?: string;
+      passwordPlain?: string;
+    }>
+  ) {
+    const results: Array<{
+      id: string;
+      fullName: string;
+      username: string;
+      passwordPlain: string;
+      groupName?: string | null;
+      faculty?: string | null;
+      phone?: string | null;
+    }> = [];
+
+    const isPg = await checkPostgres();
+    const store = readLocalStore();
+
+    for (let i = 0; i < students.length; i++) {
+      const item = students[i];
+      if (!item.fullName || !item.fullName.trim()) continue;
+
+      let plainPass = item.passwordPlain?.trim() || generateSecurePassword(8);
+      let username = item.username?.trim().toLowerCase();
+      if (!username) {
+        username = generateCleanUsername(item.fullName, i);
+      }
+
+      // Dublikatlarni tekshirish va unikal username yaratish
+      let finalUsername = username;
+      let counter = 1;
+      while (
+        (isPg && (await prisma.user.findUnique({ where: { username: finalUsername } }))) ||
+        (!isPg && store.users.some((u) => u.username.toLowerCase() === finalUsername.toLowerCase()))
+      ) {
+        finalUsername = `${username}_${counter++}`;
+      }
+
+      const hashedPassword = await hashPassword(plainPass);
+
+      if (isPg) {
+        const created = await prisma.user.create({
+          data: {
+            fullName: item.fullName.trim(),
+            username: finalUsername,
+            password: hashedPassword,
+            role: "STUDENT",
+            groupName: item.groupName?.trim() || null,
+            faculty: item.faculty?.trim() || null,
+            phone: item.phone?.trim() || null,
+          },
+        });
+        results.push({
+          id: created.id,
+          fullName: created.fullName,
+          username: created.username,
+          passwordPlain: plainPass,
+          groupName: created.groupName,
+          faculty: created.faculty,
+          phone: created.phone,
+        });
+      } else {
+        const newId = "std-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6);
+        const newUser = {
+          id: newId,
+          fullName: item.fullName.trim(),
+          username: finalUsername,
+          password: hashedPassword,
+          role: "STUDENT",
+          groupName: item.groupName?.trim() || null,
+          faculty: item.faculty?.trim() || null,
+          phone: item.phone?.trim() || null,
+          createdAt: new Date().toISOString(),
+        };
+        store.users.push(newUser);
+        results.push({
+          id: newUser.id,
+          fullName: newUser.fullName,
+          username: newUser.username,
+          passwordPlain: plainPass,
+          groupName: newUser.groupName,
+          faculty: newUser.faculty,
+          phone: newUser.phone,
+        });
+      }
+    }
+
+    if (!isPg) {
+      writeLocalStore(store);
+    }
+
+    return results;
   },
 
   // Talaba parolini yangilash
@@ -598,6 +727,61 @@ export const dbService = {
     return true;
   },
 
+  // Ommaviy savollarni yuklash (Matn yoki Excel orqali)
+  async importQuestions(
+    testId: string,
+    questions: Array<{
+      questionText: string;
+      optionA: string;
+      optionB: string;
+      optionC: string;
+      optionD: string;
+      correctAnswer: "A" | "B" | "C" | "D";
+      points?: number;
+    }>
+  ) {
+    if (await checkPostgres()) {
+      const currentCount = await prisma.question.count({ where: { testId } });
+      const created = [];
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        const item = await prisma.question.create({
+          data: {
+            testId,
+            questionText: q.questionText.trim(),
+            optionA: q.optionA.trim(),
+            optionB: q.optionB.trim(),
+            optionC: q.optionC.trim(),
+            optionD: q.optionD.trim(),
+            correctAnswer: q.correctAnswer,
+            points: q.points || 1,
+            orderIndex: currentCount + i,
+          },
+        });
+        created.push(item);
+      }
+      return created;
+    }
+
+    const store = readLocalStore();
+    const currentCount = store.questions.filter((q) => q.testId === testId).length;
+    const newQuestions = questions.map((q, idx) => ({
+      id: "q-" + Date.now() + "-" + idx + "-" + Math.random().toString(36).substring(2, 6),
+      testId,
+      questionText: q.questionText.trim(),
+      optionA: q.optionA.trim(),
+      optionB: q.optionB.trim(),
+      optionC: q.optionC.trim(),
+      optionD: q.optionD.trim(),
+      correctAnswer: q.correctAnswer,
+      points: q.points || 1,
+      orderIndex: currentCount + idx,
+    }));
+    store.questions.push(...newQuestions);
+    writeLocalStore(store);
+    return newQuestions;
+  },
+
   // Test natijasini saqlash (ball hisoblash)
   async submitExam(params: {
     testId: string;
@@ -850,5 +1034,38 @@ export const dbService = {
         user: store.users.find((u) => u.id === r.userId),
       })),
     };
+  },
+
+  // Talaba testni avval topshirganmi yoki yo'qligini tekshirish (1 marta topshirish cheklovi)
+  async hasStudentSubmitted(testId: string, userId: string): Promise<boolean> {
+    if (await checkPostgres()) {
+      const existing = await prisma.testResult.findFirst({
+        where: { testId, userId },
+      });
+      return !!existing;
+    }
+    const store = readLocalStore();
+    return store.results.some((r) => r.testId === testId && r.userId === userId);
+  },
+
+  // Telegram bot sozlamalari
+  async getTelegramSettings() {
+    const store = readLocalStore();
+    return {
+      botToken: store.settings?.telegramBotToken || process.env.TELEGRAM_BOT_TOKEN || "",
+      chatId: store.settings?.telegramChatId || process.env.TELEGRAM_CHAT_ID || "",
+      enabled: store.settings?.telegramEnabled !== undefined ? store.settings.telegramEnabled : true,
+    };
+  },
+
+  async saveTelegramSettings(settings: { botToken: string; chatId: string; enabled: boolean }) {
+    const store = readLocalStore();
+    store.settings = {
+      telegramBotToken: settings.botToken.trim(),
+      telegramChatId: settings.chatId.trim(),
+      telegramEnabled: settings.enabled,
+    };
+    writeLocalStore(store);
+    return store.settings;
   },
 };
