@@ -179,13 +179,13 @@ function writeLocalStore(data: StoreData) {
   }
 }
 
-// Baza turini tekshirish (Prisma / Postgres mavjudmi?)
+// Baza turini tekshirish (Prisma / SQLite / Postgres mavjudmi?)
 let isPostgresHealthy: boolean | null = null;
 
 async function checkPostgres(): Promise<boolean> {
   if (isPostgresHealthy !== null) return isPostgresHealthy;
   const dbUrl = process.env.DATABASE_URL;
-  if (!dbUrl || dbUrl.includes("npg_placeholder") || !dbUrl.startsWith("postgres")) {
+  if (!dbUrl || dbUrl.includes("npg_placeholder")) {
     isPostgresHealthy = false;
     return false;
   }
@@ -193,7 +193,8 @@ async function checkPostgres(): Promise<boolean> {
     await prisma.$queryRaw`SELECT 1`;
     isPostgresHealthy = true;
     return true;
-  } catch {
+  } catch (err) {
+    console.error("Prisma database check error:", err);
     isPostgresHealthy = false;
     return false;
   }
@@ -579,7 +580,7 @@ export const dbService = {
       const test = await prisma.test.findFirst({
         where: {
           OR: [
-            { accessCode: { equals: cleanCode, mode: "insensitive" } },
+            { accessCode: { equals: cleanCode } },
             { id: cleanCode },
           ],
         },
@@ -1247,7 +1248,7 @@ export const dbService = {
 
     if (await checkPostgres()) {
       const existing = await prisma.group.findFirst({
-        where: { name: { equals: cleanName, mode: "insensitive" } },
+        where: { name: { equals: cleanName } },
       });
       if (existing) throw new Error("Ushbu nomdagi guruh allaqachon mavjud!");
 
@@ -1290,7 +1291,7 @@ export const dbService = {
       const cleanName = data.name ? data.name.trim() : oldName;
       if (cleanName.toLowerCase() !== oldName.toLowerCase()) {
         const existing = await prisma.group.findFirst({
-          where: { name: { equals: cleanName, mode: "insensitive" }, id: { not: id } },
+          where: { name: { equals: cleanName }, id: { not: id } },
         });
         if (existing) throw new Error("Bu nomdagi guruh allaqachon mavjud");
       }

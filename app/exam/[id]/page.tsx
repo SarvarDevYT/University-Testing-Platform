@@ -124,14 +124,6 @@ export default function ExamPage({
 
         setShuffledQuestions(shuffledQ);
         setOptionsMap(newOptionsMap);
-
-        // LocalStorage dan avvalgi javoblarni tiklash
-        const saved = localStorage.getItem(`exam_answers_${testData.test.id}`);
-        if (saved) {
-          try {
-            setAnswers(JSON.parse(saved));
-          } catch {}
-        }
       } catch (err: any) {
         setError(err.message || "Xatolik yuz berdi");
       } finally {
@@ -199,9 +191,6 @@ export default function ExamPage({
   const handleSelectOption = (questionId: string, originalKey: string) => {
     const updated = { ...answers, [questionId]: originalKey };
     setAnswers(updated);
-    if (test?.id) {
-      localStorage.setItem(`exam_answers_${test.id}`, JSON.stringify(updated));
-    }
   };
 
   // Avtomatik topshirish (vaqt yoki cheat chegarasi buzilganda)
@@ -232,9 +221,6 @@ export default function ExamPage({
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Natijani yuborib bo'lmadi");
-
-      // LocalStorage ni tozalash
-      localStorage.removeItem(`exam_answers_${test.id}`);
 
       // Natijalar sahifasiga o'tish
       router.push(`/exam/result/${data.resultId}`);
