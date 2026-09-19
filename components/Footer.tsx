@@ -57,7 +57,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link href="/login" className="hover:text-cyan-400 transition-colors">
-                  Talaba / Admin kabineti
+                  Kabinetga kirish
                 </Link>
               </li>
             </ul>

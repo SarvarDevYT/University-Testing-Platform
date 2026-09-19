@@ -127,14 +127,8 @@ export default async function HomePage() {
                 <Brain className="w-12 h-12 text-slate-500 mx-auto mb-3" />
                 <h3 className="text-lg font-semibold text-white">Hozircha faol testlar yo&apos;q</h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Administrator CRM paneli orqali yangi testlar va savollar qo&apos;shishi mumkin.
+                  Yaqin orada yangi testlar e&apos;lon qilinadi.
                 </p>
-                <Link
-                  href="/login"
-                  className="mt-4 inline-block px-5 py-2.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold"
-                >
-                  Admin bo&apos;lib kirish
-                </Link>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -209,7 +203,7 @@ export default async function HomePage() {
               </div>
               <h4 className="text-base font-bold text-white mb-2">Talaba hisobi yoki Link</h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Admin har bir talabaga shaxsiy login-parol yaratib beradi yoki to&apos;g&apos;ridan-to&apos;g&apos;ri ommaviy test linkini yuboradi.
+                Har bir talaba shaxsiy hisobiga kiradi yoki to&apos;g&apos;ridan-to&apos;g&apos;ri ommaviy test kodi orqali ulanadi.
               </p>
             </div>
 
@@ -237,9 +231,9 @@ export default async function HomePage() {
               <div className="w-12 h-12 rounded-xl bg-slate-700/30 border border-slate-600 text-slate-300 flex items-center justify-center font-extrabold text-lg mb-4">
                 04
               </div>
-              <h4 className="text-base font-bold text-white mb-2">CRM Hisoboti va Excel</h4>
+              <h4 className="text-base font-bold text-white mb-2">Natijalar va Hisobot</h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Barcha guruhlar bo&apos;yicha natijalar administrator CRM paneliga yig&apos;iladi va Excel formatida yuklab olinadi.
+                Barcha guruhlar bo&apos;yicha natijalar xavfsiz saqlanadi va Excel formatida tahlil qilinadi.
               </p>
             </div>
           </div>
@@ -264,7 +258,7 @@ export default async function HomePage() {
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">Talabalar CRM Boshqaruvi</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Admin panelida har bir talabani kiritish, unga alohida login-parol berish, fakultet va guruhlar
+                  Har bir talabani kiritish, unga alohida login-parol berish, fakultet va guruhlar
                   kesimida boshqarish hamda ro&apos;yxatni ommaviy yuklash imkoniyati.
                 </p>
               </div>

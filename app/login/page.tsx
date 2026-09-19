@@ -68,7 +68,7 @@ export default function LoginPage() {
               Tizimga Kirish
             </h2>
             <p className="text-xs text-slate-400 mt-1">
-              Admin yoki talaba shaxsiy kabinetiga kirish
+              Shaxsiy kabinetga kirish (Login va parol orqali)
             </p>
           </div>
 
