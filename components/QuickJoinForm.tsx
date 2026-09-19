@@ -10,8 +10,12 @@ export default function QuickJoinForm() {
 
   const handleJoin = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanCode = code.trim();
+    let cleanCode = code.trim();
     if (!cleanCode) return;
+    if (cleanCode.includes("/exam/")) {
+      const parts = cleanCode.split("/exam/");
+      cleanCode = parts[parts.length - 1].split(/[?#]/)[0].trim();
+    }
     router.push(`/exam/${cleanCode}`);
   };
 

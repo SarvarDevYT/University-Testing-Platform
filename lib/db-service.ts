@@ -530,9 +530,17 @@ export const dbService = {
 
   // Testni Ommaviy havola (accessCode) orqali olish
   async getTestByAccessCode(accessCode: string) {
+    const cleanCode = (accessCode || "").trim();
+    if (!cleanCode) return null;
+
     if (await checkPostgres()) {
-      const test = await prisma.test.findUnique({
-        where: { accessCode },
+      const test = await prisma.test.findFirst({
+        where: {
+          OR: [
+            { accessCode: { equals: cleanCode, mode: "insensitive" } },
+            { id: cleanCode },
+          ],
+        },
         include: {
           questions: {
             orderBy: { orderIndex: "asc" },
@@ -548,7 +556,11 @@ export const dbService = {
     }
 
     const store = readLocalStore();
-    const test = store.tests.find((t) => t.accessCode === accessCode && t.isActive);
+    const test = store.tests.find(
+      (t) =>
+        (t.accessCode?.toLowerCase() === cleanCode.toLowerCase() || t.id === cleanCode) &&
+        t.isActive
+    );
     if (!test) return null;
 
     const questions = store.questions

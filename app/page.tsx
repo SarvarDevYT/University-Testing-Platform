@@ -14,6 +14,7 @@ import {
   Sparkles,
   QrCode,
   Zap,
+  LogIn,
 } from "lucide-react";
 import QuickJoinForm from "@/components/QuickJoinForm";
 
@@ -67,9 +68,10 @@ export default async function HomePage() {
               </Link>
               <Link
                 href="/login"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-amber-300 bg-[#1A1F2C] hover:bg-[#232938] border border-white/10 hover:border-amber-400/40 shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-slate-200 bg-[#161B26] hover:bg-[#1F2636] hover:text-white border border-white/10 hover:border-emerald-500/40 shadow-md transition-all flex items-center justify-center gap-2"
               >
-                <span>CRM Admin Panel</span>
+                <LogIn className="w-4 h-4 text-emerald-400" />
+                <span>Kabinetga kirish</span>
               </Link>
             </div>
 
