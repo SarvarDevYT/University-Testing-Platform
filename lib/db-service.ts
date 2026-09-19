@@ -183,10 +183,9 @@ function writeLocalStore(data: StoreData) {
 let isPostgresHealthy: boolean | null = null;
 
 async function checkPostgres(): Promise<boolean> {
-  if (isPostgresHealthy !== null) return isPostgresHealthy;
+  if (isPostgresHealthy === true) return true;
   const dbUrl = process.env.DATABASE_URL;
   if (!dbUrl || dbUrl.includes("npg_placeholder")) {
-    isPostgresHealthy = false;
     return false;
   }
   try {
@@ -195,7 +194,6 @@ async function checkPostgres(): Promise<boolean> {
     return true;
   } catch (err) {
     console.error("Prisma database check error:", err);
-    isPostgresHealthy = false;
     return false;
   }
 }
