@@ -132,7 +132,7 @@ export default async function HomePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {tests.map((test) => (
+                {tests.map((test: any) => (
                   <div
                     key={test.id}
                     className="glass-panel rounded-2xl p-6 flex flex-col justify-between glass-card-hover group border border-white/5 relative overflow-hidden"

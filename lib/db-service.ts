@@ -313,6 +313,57 @@ export const dbService = {
   }) {
     const hashedPassword = await hashPassword(data.passwordPlain);
 
+    const rawGroup = data.groupName?.trim();
+    let finalGroupName = rawGroup || null;
+    let finalFaculty = data.faculty?.trim() || null;
+
+    if (rawGroup) {
+      if (await checkPostgres()) {
+        const allGroups = await (prisma as any).group.findMany();
+        const existingGroup = allGroups.find(
+          (g: any) => g.name.trim().toLowerCase() === rawGroup.toLowerCase()
+        );
+
+        if (existingGroup) {
+          finalGroupName = existingGroup.name;
+          if (!finalFaculty && existingGroup.faculty) {
+            finalFaculty = existingGroup.faculty;
+          }
+        } else {
+          try {
+            const createdGroup = await (prisma as any).group.create({
+              data: {
+                name: rawGroup,
+                faculty: finalFaculty,
+              },
+            });
+            finalGroupName = createdGroup.name;
+          } catch {}
+        }
+      } else {
+        const store = readLocalStore();
+        if (!store.groups) store.groups = [];
+        const existingGroup = store.groups.find(
+          (g: any) => g.name.trim().toLowerCase() === rawGroup.toLowerCase()
+        );
+        if (existingGroup) {
+          finalGroupName = existingGroup.name;
+          if (!finalFaculty && existingGroup.faculty) {
+            finalFaculty = existingGroup.faculty;
+          }
+        } else {
+          store.groups.push({
+            id: "grp-" + Date.now(),
+            name: rawGroup,
+            faculty: finalFaculty,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          });
+          writeLocalStore(store);
+        }
+      }
+    }
+
     if (await checkPostgres()) {
       return await prisma.user.create({
         data: {
@@ -320,8 +371,8 @@ export const dbService = {
           username: data.username,
           password: hashedPassword,
           role: "STUDENT",
-          faculty: data.faculty || null,
-          groupName: data.groupName || null,
+          faculty: finalFaculty,
+          groupName: finalGroupName,
           phone: data.phone || null,
         },
       });
@@ -339,8 +390,8 @@ export const dbService = {
       password: hashedPassword,
       fullName: data.fullName,
       role: "STUDENT",
-      faculty: data.faculty || null,
-      groupName: data.groupName || null,
+      faculty: finalFaculty,
+      groupName: finalGroupName,
       phone: data.phone || null,
       createdAt: new Date().toISOString(),
     };
@@ -373,10 +424,59 @@ export const dbService = {
 
     const isPg = await checkPostgres();
     const store = readLocalStore();
+    let allGroups: any[] = [];
+    if (isPg) {
+      allGroups = await (prisma as any).group.findMany();
+    } else {
+      if (!store.groups) store.groups = [];
+      allGroups = store.groups;
+    }
 
     for (let i = 0; i < students.length; i++) {
       const item = students[i];
       if (!item.fullName || !item.fullName.trim()) continue;
+
+      let rawGroup = item.groupName?.trim();
+      let finalGroupName = rawGroup || null;
+      let finalFaculty = item.faculty?.trim() || null;
+
+      if (rawGroup) {
+        if (isPg) {
+          let matched = allGroups.find(
+            (g: any) => g.name.trim().toLowerCase() === rawGroup!.toLowerCase()
+          );
+          if (matched) {
+            finalGroupName = matched.name;
+            if (!finalFaculty && matched.faculty) finalFaculty = matched.faculty;
+          } else {
+            try {
+              matched = await (prisma as any).group.create({
+                data: { name: rawGroup, faculty: finalFaculty },
+              });
+              allGroups.push(matched);
+              finalGroupName = matched.name;
+            } catch {}
+          }
+        } else {
+          let matched = store.groups.find(
+            (g: any) => g.name.trim().toLowerCase() === rawGroup!.toLowerCase()
+          );
+          if (matched) {
+            finalGroupName = matched.name;
+            if (!finalFaculty && matched.faculty) finalFaculty = matched.faculty;
+          } else {
+            const newG = {
+              id: "grp-" + Date.now() + "-" + i,
+              name: rawGroup,
+              faculty: finalFaculty,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            store.groups.push(newG);
+            finalGroupName = newG.name;
+          }
+        }
+      }
 
       let plainPass = item.passwordPlain?.trim() || generateSecurePassword(8);
       let username = item.username?.trim().toLowerCase();
@@ -403,8 +503,8 @@ export const dbService = {
             username: finalUsername,
             password: hashedPassword,
             role: "STUDENT",
-            groupName: item.groupName?.trim() || null,
-            faculty: item.faculty?.trim() || null,
+            groupName: finalGroupName,
+            faculty: finalFaculty,
             phone: item.phone?.trim() || null,
           },
         });
@@ -421,12 +521,12 @@ export const dbService = {
         const newId = "std-" + Date.now() + "-" + Math.random().toString(36).substring(2, 6);
         const newUser = {
           id: newId,
-          fullName: item.fullName.trim(),
           username: finalUsername,
           password: hashedPassword,
+          fullName: item.fullName.trim(),
           role: "STUDENT",
-          groupName: item.groupName?.trim() || null,
-          faculty: item.faculty?.trim() || null,
+          groupName: finalGroupName,
+          faculty: finalFaculty,
           phone: item.phone?.trim() || null,
           createdAt: new Date().toISOString(),
         };
@@ -493,7 +593,7 @@ export const dbService = {
   // Barcha testlarni olish (Admin yoki Landing uchun)
   async getTests(onlyActive = false) {
     if (await checkPostgres()) {
-      const tests = await prisma.test.findMany({
+      const tests = await (prisma.test as any).findMany({
         where: onlyActive ? { isActive: true } : undefined,
         orderBy: { createdAt: "desc" },
         include: {
@@ -502,7 +602,7 @@ export const dbService = {
           },
         },
       });
-      return tests.map((t) => ({
+      return tests.map((t: any) => ({
         ...t,
         allowedGroups: parseAllowedGroups(t.allowedGroups),
       }));
@@ -528,7 +628,7 @@ export const dbService = {
   // Testni ID bo'yicha olish (savollari bilan)
   async getTestById(id: string, includeAnswers = false) {
     if (await checkPostgres()) {
-      const test = await prisma.test.findUnique({
+      const test = await (prisma.test as any).findUnique({
         where: { id },
         include: {
           questions: {
@@ -538,7 +638,7 @@ export const dbService = {
       });
       if (!test) return null;
       if (!includeAnswers) {
-        test.questions = test.questions.map((q) => ({
+        test.questions = test.questions.map((q: any) => ({
           ...q,
           correctAnswer: "", // Talabaga to'g'ri javobni ko'rsatmaslik!
         }));
@@ -577,7 +677,7 @@ export const dbService = {
     if (!cleanCode) return null;
 
     if (await checkPostgres()) {
-      const test = await prisma.test.findFirst({
+      const test = await (prisma.test as any).findFirst({
         where: {
           OR: [
             { accessCode: { equals: cleanCode } },
@@ -591,7 +691,7 @@ export const dbService = {
         },
       });
       if (!test || !test.isActive) return null;
-      test.questions = test.questions.map((q) => ({
+      test.questions = test.questions.map((q: any) => ({
         ...q,
         correctAnswer: "", // xavfsizlik: to'g'ri javob yashiriladi
       }));
@@ -636,7 +736,7 @@ export const dbService = {
     const groupsList = data.allowedGroups || [];
 
     if (await checkPostgres()) {
-      const created = await prisma.test.create({
+      const created = await (prisma.test as any).create({
         data: {
           title: data.title,
           description: data.description || null,
@@ -672,7 +772,7 @@ export const dbService = {
   // Testni yangilash
   async updateTest(id: string, data: Partial<TestDTO>) {
     if (await checkPostgres()) {
-      const updated = await prisma.test.update({
+      const updated = await (prisma.test as any).update({
         where: { id },
         data: {
           title: data.title,
@@ -1120,24 +1220,24 @@ export const dbService = {
   // === GURUHLAR BOSHQARUVI (GROUPS CRM) ===
   async getGroups(): Promise<GroupDTO[]> {
     if (await checkPostgres()) {
-      const groups = await prisma.group.findMany({
+      const groups = await (prisma as any).group.findMany({
         orderBy: { name: "asc" },
       });
       const allStudents = await prisma.user.findMany({
         where: { role: "STUDENT" },
         select: { groupName: true },
       });
-      const allTests = await prisma.test.findMany({
+      const allTests = await (prisma.test as any).findMany({
         select: { allowedGroups: true },
       });
 
-      return groups.map((g) => {
+      return groups.map((g: any) => {
         const studentCount = allStudents.filter(
-          (s) => s.groupName?.trim().toLowerCase() === g.name.trim().toLowerCase()
+          (s: any) => s.groupName?.trim().toLowerCase() === g.name.trim().toLowerCase()
         ).length;
-        const testCount = allTests.filter((t) => {
+        const testCount = allTests.filter((t: any) => {
           const parsed = parseAllowedGroups(t.allowedGroups);
-          return parsed.length === 0 || parsed.some((ag) => ag.toLowerCase() === g.name.toLowerCase());
+          return parsed.length === 0 || parsed.some((ag: string) => ag.toLowerCase() === g.name.toLowerCase());
         }).length;
 
         return {
@@ -1180,10 +1280,10 @@ export const dbService = {
     let tests: any[] = [];
 
     if (await checkPostgres()) {
-      group = await prisma.group.findUnique({ where: { id } });
+      group = await (prisma as any).group.findUnique({ where: { id } });
       if (!group) return null;
-      students = await prisma.user.findMany({
-        where: { role: "STUDENT", groupName: group.name },
+      const allStudents = await prisma.user.findMany({
+        where: { role: "STUDENT" },
         select: {
           id: true,
           username: true,
@@ -1195,10 +1295,13 @@ export const dbService = {
         },
         orderBy: { fullName: "asc" },
       });
-      const allTests = await prisma.test.findMany({
+      students = allStudents.filter(
+        (s: any) => s.groupName?.trim().toLowerCase() === group.name.trim().toLowerCase()
+      );
+      const allTests = await (prisma.test as any).findMany({
         orderBy: { createdAt: "desc" },
       });
-      tests = allTests.map((t) => {
+      tests = allTests.map((t: any) => {
         const parsed = parseAllowedGroups(t.allowedGroups);
         return {
           id: t.id,
@@ -1206,7 +1309,7 @@ export const dbService = {
           category: t.category,
           isActive: t.isActive,
           allowedGroups: parsed,
-          isAssigned: parsed.length === 0 || parsed.some((ag) => ag.toLowerCase() === group.name.toLowerCase()),
+          isAssigned: parsed.length === 0 || parsed.some((ag: string) => ag.toLowerCase() === group.name.toLowerCase()),
         };
       });
     } else {
@@ -1247,12 +1350,12 @@ export const dbService = {
     if (!cleanName) throw new Error("Guruh nomi kiritilishi shart");
 
     if (await checkPostgres()) {
-      const existing = await prisma.group.findFirst({
+      const existing = await (prisma as any).group.findFirst({
         where: { name: { equals: cleanName } },
       });
       if (existing) throw new Error("Ushbu nomdagi guruh allaqachon mavjud!");
 
-      return await prisma.group.create({
+      return await (prisma as any).group.create({
         data: {
           name: cleanName,
           faculty: data.faculty?.trim() || null,
@@ -1284,19 +1387,19 @@ export const dbService = {
     let oldName = "";
 
     if (await checkPostgres()) {
-      const current = await prisma.group.findUnique({ where: { id } });
+      const current = await (prisma as any).group.findUnique({ where: { id } });
       if (!current) throw new Error("Guruh topilmadi");
       oldName = current.name;
 
       const cleanName = data.name ? data.name.trim() : oldName;
       if (cleanName.toLowerCase() !== oldName.toLowerCase()) {
-        const existing = await prisma.group.findFirst({
+        const existing = await (prisma as any).group.findFirst({
           where: { name: { equals: cleanName }, id: { not: id } },
         });
         if (existing) throw new Error("Bu nomdagi guruh allaqachon mavjud");
       }
 
-      const updated = await prisma.group.update({
+      const updated = await (prisma as any).group.update({
         where: { id },
         data: {
           name: cleanName,
@@ -1318,10 +1421,12 @@ export const dbService = {
     const idx = (store.groups || []).findIndex((g: any) => g.id === id);
     if (idx === -1) throw new Error("Guruh topilmadi");
     oldName = store.groups[idx].name;
-    const cleanName = data.name ? data.name.trim() : oldName;
 
+    const cleanName = data.name ? data.name.trim() : oldName;
     if (cleanName.toLowerCase() !== oldName.toLowerCase()) {
-      const existing = store.groups.find((g: any) => g.name.toLowerCase() === cleanName.toLowerCase() && g.id !== id);
+      const existing = (store.groups || []).find(
+        (g: any) => g.name.toLowerCase() === cleanName.toLowerCase() && g.id !== id
+      );
       if (existing) throw new Error("Bu nomdagi guruh allaqachon mavjud");
     }
 
@@ -1339,7 +1444,7 @@ export const dbService = {
       });
       store.tests.forEach((t: any) => {
         if (t.allowedGroups && Array.isArray(t.allowedGroups)) {
-          t.allowedGroups = t.allowedGroups.map((g: string) => g === oldName ? cleanName : g);
+          t.allowedGroups = t.allowedGroups.map((g: string) => (g === oldName ? cleanName : g));
         }
       });
     }
@@ -1351,9 +1456,9 @@ export const dbService = {
   async deleteGroup(id: string) {
     if (await checkPostgres()) {
       try {
-        const group = await prisma.group.findUnique({ where: { id } });
+        const group = await (prisma as any).group.findUnique({ where: { id } });
         if (group) {
-          await prisma.group.delete({ where: { id } }).catch(console.warn);
+          await (prisma as any).group.delete({ where: { id } }).catch(console.warn);
         }
       } catch (err) {
         console.error("deleteGroup postgres error:", err);
@@ -1421,21 +1526,21 @@ export const dbService = {
     const gName = groupName.trim();
 
     if (await checkPostgres()) {
-      const allTests = await prisma.test.findMany();
+      const allTests = await (prisma.test as any).findMany();
       for (const t of allTests) {
         let currentGroups = parseAllowedGroups(t.allowedGroups);
         const shouldHave = assignedTestIds.includes(t.id);
-        const has = currentGroups.some((g) => g.toLowerCase() === gName.toLowerCase());
+        const has = currentGroups.some((g: string) => g.toLowerCase() === gName.toLowerCase());
 
         if (shouldHave && !has) {
           currentGroups.push(gName);
-          await prisma.test.update({
+          await (prisma.test as any).update({
             where: { id: t.id },
             data: { allowedGroups: JSON.stringify(currentGroups) },
           });
         } else if (!shouldHave && has) {
-          currentGroups = currentGroups.filter((g) => g.toLowerCase() !== gName.toLowerCase());
-          await prisma.test.update({
+          currentGroups = currentGroups.filter((g: string) => g.toLowerCase() !== gName.toLowerCase());
+          await (prisma.test as any).update({
             where: { id: t.id },
             data: { allowedGroups: currentGroups.length > 0 ? JSON.stringify(currentGroups) : null },
           });
@@ -1448,13 +1553,13 @@ export const dbService = {
     store.tests.forEach((t: any) => {
       let currentGroups = parseAllowedGroups(t.allowedGroups);
       const shouldHave = assignedTestIds.includes(t.id);
-      const has = currentGroups.some((g) => g.toLowerCase() === gName.toLowerCase());
+      const has = currentGroups.some((g: string) => g.toLowerCase() === gName.toLowerCase());
 
       if (shouldHave && !has) {
         currentGroups.push(gName);
         t.allowedGroups = currentGroups;
       } else if (!shouldHave && has) {
-        currentGroups = currentGroups.filter((g) => g.toLowerCase() !== gName.toLowerCase());
+        currentGroups = currentGroups.filter((g: string) => g.toLowerCase() !== gName.toLowerCase());
         t.allowedGroups = currentGroups;
       }
     });
@@ -1473,7 +1578,7 @@ export const dbService = {
     let title = "";
 
     if (await checkPostgres()) {
-      const test = await prisma.test.findUnique({
+      const test = await (prisma.test as any).findUnique({
         where: { id: testId },
         select: { title: true, allowedGroups: true },
       });
