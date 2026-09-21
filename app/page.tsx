@@ -12,11 +12,9 @@ import {
   Brain,
   GraduationCap,
   Sparkles,
-  QrCode,
   Zap,
   LogIn,
 } from "lucide-react";
-import QuickJoinForm from "@/components/QuickJoinForm";
 
 export const dynamic = "force-dynamic";
 
@@ -38,12 +36,12 @@ export default async function HomePage() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-xs font-semibold text-emerald-300 mb-6 backdrop-blur-md">
               <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Universitet uchun 100% Bepul va Ommaviy Test Tizimi</span>
+              <span>Universitet uchun Yagona Raqamli Test Platformasi</span>
             </div>
 
             {/* Sarlavha */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight md:leading-[1.15]">
-              Yagona havola orqali{" "}
+              Akademik guruhlar kesimida{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300">
                 1000+ talabadan
               </span>{" "}
@@ -53,31 +51,26 @@ export default async function HomePage() {
             {/* Tavsif */}
             <p className="mt-6 text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
               Oliy ta&apos;lim muassasalari, fakultetlar va o&apos;qituvchilar uchun mo&apos;ljallangan zamonaviy
-              imtihon, oraliq nazorat va diagnostika platformasi. Yuqori yuklamalarda qotmaydi, natijalarni
-              avtomatik tahlil qiladi.
+              imtihon, oraliq nazorat va diagnostika platformasi. Har bir guruh va talabaga alohida nazorat,
+              natijalarni avtomatik baholash va tahlil.
             </p>
 
             {/* Tugmalar */}
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
+                href="/login"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/25 hover:scale-105 transition-all flex items-center justify-center gap-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Kabinetga kirish</span>
+              </Link>
+              <Link
                 href="#tests-catalog"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-600/25 transition-all flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-slate-200 bg-[#161B26] hover:bg-[#1F2636] hover:text-white border border-white/10 hover:border-emerald-500/40 shadow-md transition-all flex items-center justify-center gap-2"
               >
                 <span>Testlar katalogi</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
-              <Link
-                href="/login"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm text-slate-200 bg-[#161B26] hover:bg-[#1F2636] hover:text-white border border-white/10 hover:border-emerald-500/40 shadow-md transition-all flex items-center justify-center gap-2"
-              >
-                <LogIn className="w-4 h-4 text-emerald-400" />
-                <span>Kabinetga kirish</span>
-              </Link>
-            </div>
-
-            {/* Quick Join Widget */}
-            <div id="join-code" className="mt-14 max-w-xl mx-auto">
-              <QuickJoinForm />
             </div>
 
             {/* Asosiy ko'rsatkichlar */}
@@ -201,9 +194,9 @@ export default async function HomePage() {
               <div className="w-12 h-12 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-extrabold text-lg mb-4">
                 01
               </div>
-              <h4 className="text-base font-bold text-white mb-2">Talaba hisobi yoki Link</h4>
+              <h4 className="text-base font-bold text-white mb-2">Talaba Shaxsiy Hisobi</h4>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Har bir talaba shaxsiy hisobiga kiradi yoki to&apos;g&apos;ridan-to&apos;g&apos;ri ommaviy test kodi orqali ulanadi.
+                Har bir talaba o&apos;z login va paroli orqali tizimga kiradi va faqat o&apos;z guruhiga biriktirilgan testlarni ko&apos;radi.
               </p>
             </div>
 
@@ -265,12 +258,11 @@ export default async function HomePage() {
 
               <div className="glass-panel p-7 rounded-2xl">
                 <div className="w-12 h-12 rounded-xl bg-teal-500/15 border border-teal-500/30 text-teal-400 flex items-center justify-center mb-5">
-                  <QrCode className="w-6 h-6" />
+                  <GraduationCap className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Ommaviy Havola va QR-Kod</h3>
+                <h3 className="text-lg font-bold text-white mb-2">Akademik Guruhlar Boshqaruvi</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Auditoriyadagi 100+ talaba bitta QR-kodni skanerlab yoki havola orqali testga ulanishi mumkin.
-                  Ortiqcha ro&apos;yxatdan o&apos;tish talab etilmaydi.
+                  Testlar faqat belgilangan akademik guruh talabalari uchun ochiladi. Begona shaxslar yoki boshqa guruhlar testga kira olmaydi.
                 </p>
               </div>
 

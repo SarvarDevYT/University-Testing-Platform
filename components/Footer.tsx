@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   Lock,
-  KeyRound,
   LogIn,
 } from "lucide-react";
 
@@ -40,16 +39,8 @@ export default function Footer() {
 
           <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
             <Link
-              href="#join-code"
-              className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-emerald-950/50 border border-emerald-500/30 hover:bg-emerald-900/40 text-emerald-300 text-xs font-semibold flex items-center justify-center gap-2 transition-all"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Kod orqali kirish</span>
-            </Link>
-
-            <Link
               href="/login"
-              className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 hover:scale-105 transition-all"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Kabinetga kirish</span>
@@ -125,11 +116,6 @@ export default function Footer() {
               <li>
                 <Link href="#features" className="hover:text-emerald-400 transition-colors">
                   Tizim afzalliklari
-                </Link>
-              </li>
-              <li>
-                <Link href="#join-code" className="hover:text-emerald-400 transition-colors">
-                  Test kodini kiritish
                 </Link>
               </li>
             </ul>

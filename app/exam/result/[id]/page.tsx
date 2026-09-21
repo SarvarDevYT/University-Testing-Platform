@@ -196,13 +196,13 @@ export default function ExamResultPage({
           <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
               <Layers className="w-4 h-4 text-emerald-400" />
-              <span>Savollar Tahlili va To&apos;g&apos;ri Javoblar</span>
+              <span>Savollar Holati</span>
             </h3>
 
             <div className="space-y-4">
               {questions.map((q: any, idx: number) => {
-                const userChoice = parsedAnswers[q.id];
-                const isCorrect = userChoice && userChoice.toUpperCase() === q.correctAnswer?.toUpperCase();
+                const userChoice = q.userChoice || parsedAnswers[q.id];
+                const isCorrect = q.isCorrect !== undefined ? q.isCorrect : false;
 
                 return (
                   <div
@@ -237,12 +237,6 @@ export default function ExamResultPage({
                           {userChoice || "Belgilanmagan"}
                         </strong>
                       </div>
-                      {!isCorrect && (
-                        <div>
-                          To&apos;g&apos;ri javob:{" "}
-                          <strong className="text-emerald-400">{q.correctAnswer}</strong>
-                        </div>
-                      )}
                     </div>
                   </div>
                 );

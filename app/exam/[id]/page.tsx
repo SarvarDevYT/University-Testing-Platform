@@ -43,8 +43,6 @@ export default function ExamPage({
 
   // Foydalanuvchi ma'lumotlari
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [guestName, setGuestName] = useState("");
-  const [guestGroup, setGuestGroup] = useState("");
   const [isStarted, setIsStarted] = useState(false);
 
   // Shuffled savollar va variantlar (Anti-cheat ko'chirishga qarshi)
@@ -86,8 +84,6 @@ export default function ExamPage({
 
         if (testData.currentUser) {
           setCurrentUser(testData.currentUser);
-          setGuestName(testData.currentUser.fullName);
-          setGuestGroup(testData.currentUser.groupName || "");
         }
 
         if (testData.alreadySubmitted) {
@@ -214,8 +210,8 @@ export default function ExamPage({
         body: JSON.stringify({
           answers,
           timeSpentSeconds: timeSpent,
-          guestName: currentUser?.fullName || guestName,
-          guestGroup: currentUser?.groupName || guestGroup,
+          guestName: currentUser?.fullName,
+          guestGroup: currentUser?.groupName,
         }),
       });
 
@@ -437,49 +433,35 @@ export default function ExamPage({
               </div>
             </div>
           ) : (
-            <div className="space-y-3 mb-6">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  To&apos;liq Ism-Familiyangiz *
-                </label>
-                <input
-                  type="text"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="Masalan: Aliyev Valijon"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Guruhingiz / Fakultetingiz
-                </label>
-                <input
-                  type="text"
-                  value={guestGroup}
-                  onChange={(e) => setGuestGroup(e.target.value)}
-                  placeholder="Masalan: 210-guruh"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-                />
-              </div>
+            <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 mb-6 text-center space-y-3">
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Universitet test sinovida qatnashish uchun avval shaxsiy kabinetingizga kirishingiz shart. Natijalar faqat tizimga kirgan talabalar uchun qayd etiladi.
+              </p>
+              <Link
+                href={`/login?callbackUrl=/exam/${id}`}
+                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2"
+              >
+                Kabinetga Kirish
+              </Link>
             </div>
           )}
 
-          <button
-            onClick={() => {
-              if (!currentUser && !guestName.trim()) {
-                alert("Iltimos, ism-familiyangizni kiriting!");
-                return;
-              }
-              setIsStarted(true);
-            }}
-            className="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <span>Testni Boshlash</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          {currentUser ? (
+            <button
+              onClick={() => setIsStarted(true)}
+              className="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <span>Testni Boshlash</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <Link
+              href="/"
+              className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold text-center block transition-all"
+            >
+              Bosh Sahifaga Qaytish
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -716,13 +698,7 @@ export default function ExamPage({
               Testni yakunlaysizmi?
             </h3>
             <p className="text-xs text-slate-300 mb-6 leading-relaxed">
-              Siz <strong className="text-white">{questions.length}</strong> ta savoldan{" "}
-              <strong className="text-emerald-400">{answeredCount}</strong> tasiga javob berdingiz.
-              {answeredCount < questions.length && (
-                <span className="block text-amber-400 mt-1">
-                  ⚠️ Diqqat: {questions.length - answeredCount} ta savol belgilanmagan!
-                </span>
-              )}
+              Haqiqatan ham testni yakunlab, natijalaringizni topshirmoqchimisiz? Topshirilgandan so&apos;ng javoblarni qayta o&apos;zgartirib bo&apos;lmaydi.
             </p>
 
             <div className="flex gap-3">

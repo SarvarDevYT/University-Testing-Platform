@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { GraduationCap, LogIn, KeyRound, Menu, X, LayoutDashboard } from "lucide-react";
+import { GraduationCap, LogIn, Menu, X, LayoutDashboard } from "lucide-react";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -67,19 +67,12 @@ export default function Navbar() {
           </div>
 
           {/* Action Buttons */}
+          {/* Action Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              href="#join-code"
-              className="px-4 py-2 text-xs font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 rounded-lg hover:bg-emerald-900/40 hover:border-emerald-400 transition-all flex items-center gap-2"
-            >
-              <KeyRound className="w-4 h-4 text-emerald-400" />
-              <span>Kod orqali kirish</span>
-            </Link>
-
             {user ? (
               <Link
                 href={user.role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard"}
-                className="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-md shadow-emerald-600/30 transition-all flex items-center gap-2"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2"
               >
                 <LayoutDashboard className="w-4 h-4" />
                 <span>{user.role === "ADMIN" ? "Admin CRM" : "Shaxsiy Kabinet"}</span>
@@ -87,7 +80,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-500 rounded-lg shadow-md shadow-emerald-600/30 transition-all flex items-center gap-2"
+                className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Kabinetga kirish</span>
@@ -131,13 +124,6 @@ export default function Navbar() {
               Qanday ishlaydi?
             </Link>
             <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
-              <Link
-                href="#join-code"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full py-2.5 text-center text-xs font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 rounded-lg"
-              >
-                Kod orqali kirish
-              </Link>
               <Link
                 href={user ? (user.role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard") : "/login"}
                 onClick={() => setMobileMenuOpen(false)}

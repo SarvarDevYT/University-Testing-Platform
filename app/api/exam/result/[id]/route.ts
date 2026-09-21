@@ -13,6 +13,24 @@ export async function GET(
       return NextResponse.json({ error: "Natija topilmadi" }, { status: 404 });
     }
 
+    // Xavfsizlik: Talabaga savollarning to'g'ri javoblari (answer key) aslo yuborilmaydi!
+    // Faqat talabaning o'z javobi va to'g'ri/noto'g'riligi yuboriladi
+    if (result.test && result.test.questions) {
+      const parsedAnswers = JSON.parse(result.answersJson || "{}");
+      const safeQuestions = result.test.questions.map((q: any) => {
+        const userChoice = parsedAnswers[q.id];
+        const isCorrect = !!(userChoice && q.correctAnswer && userChoice.toUpperCase() === q.correctAnswer.toUpperCase());
+        return {
+          id: q.id,
+          questionText: q.questionText,
+          orderIndex: q.orderIndex,
+          userChoice: userChoice || null,
+          isCorrect,
+        };
+      });
+      result.test.questions = safeQuestions;
+    }
+
     return NextResponse.json({ result });
   } catch (error: any) {
     return NextResponse.json(

@@ -8,14 +8,10 @@ import {
   Clock,
   CheckCircle2,
   Trash2,
-  Share2,
   ExternalLink,
   Edit,
   X,
-  Check,
-  Copy,
   AlertCircle,
-  QrCode,
   Layers,
   FolderKanban,
   ShieldCheck,
@@ -38,9 +34,7 @@ export default function AdminTestsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [modalError, setModalError] = useState("");
 
-  // Ommaviy havola / QR-kod modal
-  const [shareModalTest, setShareModalTest] = useState<any | null>(null);
-  const [copiedLink, setCopiedLink] = useState(false);
+
 
   // Tezkor guruhlar dostup modal
   const [accessModalTest, setAccessModalTest] = useState<any | null>(null);
@@ -151,13 +145,6 @@ export default function AdminTestsPage() {
     }
   };
 
-  const copyShareLink = (accessCode: string) => {
-    const url = `${window.location.origin}/exam/${accessCode}`;
-    navigator.clipboard.writeText(url);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2500);
-  };
-
   return (
     <div className="space-y-6">
       {/* Sarlavha va Yangi Test */}
@@ -167,7 +154,7 @@ export default function AdminTestsPage() {
             Testlar Boshqaruvi
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Fanlar bo&apos;yicha testlar, savollar banki va ommaviy havolalar (Mass Link / QR-kod)
+            Fanlar bo&apos;yicha testlar, savollar banki va akademik guruhlar dostupini boshqarish
           </p>
         </div>
 
@@ -275,14 +262,6 @@ export default function AdminTestsPage() {
                   className="p-2 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 transition-all cursor-pointer"
                 >
                   <ShieldCheck className="w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  onClick={() => setShareModalTest(test)}
-                  title="Ommaviy havola va QR-kod"
-                  className="p-2 rounded-xl bg-[#1C2541] hover:bg-[#253259] text-cyan-400 border border-white/10 hover:border-cyan-400/40 transition-all cursor-pointer"
-                >
-                  <Share2 className="w-3.5 h-3.5" />
                 </button>
 
                 <button
@@ -641,53 +620,6 @@ export default function AdminTestsPage() {
         </div>
       )}
 
-      {/* OMMAVIY HAVOLA VA QR-KOD MODALI (Mass Link / QR) */}
-      {shareModalTest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="glass-panel w-full max-w-md p-6 sm:p-8 rounded-3xl border border-white/15 shadow-2xl relative text-center">
-            <button
-              onClick={() => setShareModalTest(null)}
-              className="absolute top-5 right-5 text-slate-400 hover:text-white p-1"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto mb-4">
-              <QrCode className="w-6 h-6" />
-            </div>
-
-            <h3 className="text-lg font-bold text-white mb-1">
-              Ommaviy Havola & QR-Kod
-            </h3>
-            <p className="text-xs text-slate-400 mb-6">
-              Auditoriyadagi talabalar ushbu havola orqali bir zumda testga ulanishadi
-            </p>
-
-            {/* Havola qutisi */}
-            <div className="p-3.5 rounded-2xl bg-black/50 border border-white/10 text-left mb-5">
-              <div className="text-[10px] text-slate-400 mb-1 font-semibold uppercase tracking-wider">
-                Yagona Havola:
-              </div>
-              <div className="text-xs font-mono text-cyan-400 break-all select-all">
-                {typeof window !== "undefined" ? `${window.location.origin}/exam/${shareModalTest.accessCode}` : ""}
-              </div>
-            </div>
-
-            {/* Havolani nusxalash tugmasi */}
-            <button
-              onClick={() => copyShareLink(shareModalTest.accessCode)}
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg transition-all"
-            >
-              {copiedLink ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              <span>{copiedLink ? "Havola nusxalandi!" : "Havolani Nusxalash"}</span>
-            </button>
-
-            <p className="text-[11px] text-slate-500 mt-4">
-              Talaba havola orqali kirganda o&apos;z ism-familiyasi va guruhini kiritib testni yecha oladi.
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -14,11 +14,11 @@ export async function POST(
     // Tizimga kirgan talaba bo'lsa uni olamiz
     const currentUser = await getCurrentUser();
 
-    // Agar na login qilingan talaba, na guestName bo'lsa xato
-    if (!currentUser && !guestName) {
+    // Faqat tizimga kirgan talabalar test topshira oladi
+    if (!currentUser) {
       return NextResponse.json(
-        { error: "Test topshiruvchining ism-familiyasi ko'rsatilmadi" },
-        { status: 400 }
+        { error: "Test topshirish uchun avval shaxsiy hisobingizga kiring!" },
+        { status: 401 }
       );
     }
 
