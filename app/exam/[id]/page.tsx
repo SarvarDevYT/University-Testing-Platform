@@ -18,6 +18,7 @@ import {
   EyeOff,
   Lock,
   Users,
+  Maximize,
 } from "lucide-react";
 
 export default function ExamPage({
@@ -56,9 +57,10 @@ export default function ExamPage({
   const [submitting, setSubmitting] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
-  // Anti-cheat tab almashtirish nazorati
+  // Anti-cheat tab va to'liq ekran nazorati
   const [violationCount, setViolationCount] = useState(0);
   const [showViolationModal, setShowViolationModal] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 1. Foydalanuvchi va Testni yuklash
   useEffect(() => {
@@ -147,16 +149,16 @@ export default function ExamPage({
     return () => clearInterval(timer);
   }, [isStarted, timeLeftSeconds]);
 
-  // 3. Anti-Cheat: Tab/ekranni almashtirish nazorati
+  // 3. Anti-Cheat: Tab, To'liq ekran, Klaviatura va Nusxalash nazorati
   useEffect(() => {
     if (!isStarted) return;
 
-    const triggerViolation = () => {
+    const triggerViolation = (customMsg?: string) => {
       setViolationCount((prev) => {
         const next = prev + 1;
         if (next >= 3) {
-          // 3-marta ekrandan chiqsa majburiy topshiriladi
-          handleAutoSubmit("DIQQAT! 3 marta test oynasini tark etganingiz sababli test majburiy yakunlandi!");
+          // 3-marta qoidabuzarlik sodir etilsa test majburiy yakunlanadi
+          handleAutoSubmit("DIQQAT! 3 marta akademik test qoidalarini (ekrandan chiqish/nusxalash) buzganingiz sababli test majburiy yakunlandi!");
         } else {
           setShowViolationModal(true);
         }
@@ -174,12 +176,66 @@ export default function ExamPage({
       triggerViolation();
     };
 
+    // To'liq ekrandan chiqishni nazorat qilish
+    const handleFullscreenChange = () => {
+      const isNowFullscreen = !!document.fullscreenElement;
+      setIsFullscreen(isNowFullscreen);
+      if (!isNowFullscreen && isStarted) {
+        triggerViolation();
+      }
+    };
+
+    // Klaviatura cheklovlari (F12, PrintScreen, Ctrl+C, Ctrl+V, Ctrl+A, Ctrl+U, Ctrl+Shift+I)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key ? e.key.toUpperCase() : "";
+      
+      // F12 yoki PrintScreen
+      if (e.key === "F12" || e.key === "PrintScreen") {
+        e.preventDefault();
+        e.stopPropagation();
+        triggerViolation();
+        return false;
+      }
+
+      // Ctrl + (C, V, A, U, S, P)
+      if (e.ctrlKey && ["C", "V", "A", "U", "S", "P"].includes(key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+
+      // Ctrl + Shift + (I, J, C) -> Developer Tools
+      if (e.ctrlKey && e.shiftKey && ["I", "J", "C"].includes(key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      }
+    };
+
+    // Sichqoncha o'ng tugmasi va nusxalashni bloklash
+    const blockEvent = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
     window.addEventListener("blur", handleBlur);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    window.addEventListener("keydown", handleKeyDown, true);
+    document.addEventListener("copy", blockEvent, true);
+    document.addEventListener("cut", blockEvent, true);
+    document.addEventListener("paste", blockEvent, true);
+    document.addEventListener("contextmenu", blockEvent, true);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleBlur);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      window.removeEventListener("keydown", handleKeyDown, true);
+      document.removeEventListener("copy", blockEvent, true);
+      document.removeEventListener("cut", blockEvent, true);
+      document.removeEventListener("paste", blockEvent, true);
+      document.removeEventListener("contextmenu", blockEvent, true);
     };
   }, [isStarted]);
 
@@ -412,10 +468,10 @@ export default function ExamPage({
           </div>
 
           {/* Anti-cheat ogohlantirish */}
-          <div className="mb-6 p-3 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[11px] flex items-start gap-2.5 leading-relaxed">
+          <div className="mb-6 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25 text-amber-300 text-[11px] flex items-start gap-2.5 leading-relaxed">
             <ShieldAlert className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <b>Ko&apos;chirishga qarshi qoida:</b> Test vaqtida brauzer tabini yoki oynani almashtirish qat&apos;iyan man etiladi. 3 marta ekranni tark etsangiz, test bekor qilinadi.
+              <b>Akademik xavfsizlik va Anti-Cheat:</b> Test to&apos;liq ekran (Fullscreen) rejimida o&apos;tadi. Test davomida brauzer tabini almashtirish, to&apos;liq ekrandan chiqish, nusxalash (`Ctrl+C`, `Ctrl+V`), skrinshot yoki boshqa ilovalarga o&apos;tish qat&apos;iyan man etiladi.
             </div>
           </div>
 
@@ -448,10 +504,19 @@ export default function ExamPage({
 
           {currentUser ? (
             <button
-              onClick={() => setIsStarted(true)}
+              onClick={async () => {
+                try {
+                  if (document.documentElement.requestFullscreen) {
+                    await document.documentElement.requestFullscreen().catch(() => {});
+                    setIsFullscreen(true);
+                  }
+                } catch (e) {}
+                setIsStarted(true);
+              }}
               className="w-full py-3.5 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Testni Boshlash</span>
+              <Maximize className="w-4 h-4" />
+              <span>Testni Boshlash (To&apos;liq ekran)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
@@ -497,6 +562,25 @@ export default function ExamPage({
               <Clock className="w-4 h-4" />
               <span>{formatTime(timeLeftSeconds)}</span>
             </div>
+
+            {/* To'liq ekran tugmasi */}
+            <button
+              onClick={() => {
+                if (!document.fullscreenElement) {
+                  document.documentElement.requestFullscreen?.().catch(() => {});
+                  setIsFullscreen(true);
+                }
+              }}
+              title="To'liq ekran rejimiga o'tish"
+              className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                isFullscreen
+                  ? "bg-white/5 text-slate-400 border-white/10"
+                  : "bg-amber-500/20 text-amber-300 border-amber-500/40 animate-pulse"
+              }`}
+            >
+              <Maximize className="w-3.5 h-3.5" />
+              <span>{isFullscreen ? "To'liq ekran" : "To'liq ekranga o'tish"}</span>
+            </button>
 
             {/* Yakunlash tugmasi */}
             <button

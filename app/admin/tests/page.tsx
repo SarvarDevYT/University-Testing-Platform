@@ -31,6 +31,8 @@ export default function AdminTestsPage() {
   const [passingScore, setPassingScore] = useState(60);
   const [accessType, setAccessType] = useState<"all" | "selected">("all");
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [modalError, setModalError] = useState("");
 
@@ -79,6 +81,8 @@ export default function AdminTestsPage() {
           timeLimit,
           passingScore,
           allowedGroups: accessType === "all" ? [] : selectedGroups,
+          startTime: startTime ? new Date(startTime).toISOString() : null,
+          endTime: endTime ? new Date(endTime).toISOString() : null,
         }),
       });
 
@@ -88,6 +92,8 @@ export default function AdminTestsPage() {
       setIsAddModalOpen(false);
       setTitle("");
       setDescription("");
+      setStartTime("");
+      setEndTime("");
       setAccessType("all");
       setSelectedGroups([]);
       fetchTests();
@@ -244,6 +250,20 @@ export default function AdminTestsPage() {
                     ))
                   )}
                 </div>
+
+                {/* Muddat (Deadline) ko'rsatgichi */}
+                {(test.startTime || test.endTime) && (
+                  <div className="mt-2.5 px-2.5 py-1.5 rounded-lg bg-[#0A0D14] border border-white/5 text-[10px] text-slate-400 flex items-center gap-1.5 flex-wrap font-mono">
+                    <Clock className="w-3 h-3 text-amber-400 shrink-0" />
+                    {test.startTime && (
+                      <span>Boshlanish: <b className="text-white">{new Date(test.startTime).toLocaleDateString("uz-UZ")} {new Date(test.startTime).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" })}</b></span>
+                    )}
+                    {test.startTime && test.endTime && <span>—</span>}
+                    {test.endTime && (
+                      <span>Tugash: <b className="text-amber-400">{new Date(test.endTime).toLocaleDateString("uz-UZ")} {new Date(test.endTime).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" })}</b></span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Amallar */}
@@ -376,6 +396,41 @@ export default function AdminTestsPage() {
                   rows={2}
                   className="w-full px-3.5 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                 />
+              </div>
+
+              {/* Test Vaqti va Muddati (Deadline) */}
+              <div className="p-4 rounded-2xl bg-[#0A0D14] border border-white/10 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-white">
+                  <Clock className="w-4 h-4 text-cyan-400" />
+                  <span>Test Vaqti va Muddati (Deadline - Ixtiyoriy)</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1">
+                      Boshlanish sanasi va vaqti
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] text-slate-400 mb-1">
+                      Tugash muddati (Deadline)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl bg-[#0F172A] border border-white/10 text-white text-xs focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  Bo&apos;sh qoldirilsa, test doimiy ravishda faol bo&apos;ladi.
+                </p>
               </div>
 
               {/* Guruhlar dostupini sozlash */}

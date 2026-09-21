@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { title, description, category, timeLimit, passingScore, allowedGroups } = body;
+    const { title, description, category, timeLimit, passingScore, allowedGroups, startTime, endTime } = body;
 
     if (!title) {
       return NextResponse.json({ error: "Test nomini kiriting" }, { status: 400 });
@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
       passingScore: parseInt(passingScore) || 60,
       isActive: true,
       allowedGroups: Array.isArray(allowedGroups) ? allowedGroups : [],
+      startTime: startTime || null,
+      endTime: endTime || null,
     });
 
     return NextResponse.json({ success: true, test: newTest });

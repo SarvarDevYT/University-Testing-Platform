@@ -49,6 +49,8 @@ export interface TestDTO {
   isActive: boolean;
   accessCode: string;
   allowedGroups?: string[]; // Ruxsat berilgan guruhlar ro'yxati (masalan: ["DI-210", "KI-104"])
+  startTime?: Date | string | null;
+  endTime?: Date | string | null;
   createdAt: Date;
   questions?: QuestionDTO[];
   _count?: {
@@ -737,9 +739,13 @@ export const dbService = {
     passingScore: number;
     isActive?: boolean;
     allowedGroups?: string[];
+    startTime?: string | Date | null;
+    endTime?: string | Date | null;
   }) {
     const accessCode = "test-" + Math.random().toString(36).substring(2, 8);
     const groupsList = data.allowedGroups || [];
+    const parsedStartTime = data.startTime ? new Date(data.startTime) : null;
+    const parsedEndTime = data.endTime ? new Date(data.endTime) : null;
 
     if (await checkPostgres()) {
       const created = await (prisma.test as any).create({
@@ -752,6 +758,8 @@ export const dbService = {
           isActive: data.isActive !== undefined ? data.isActive : true,
           accessCode,
           allowedGroups: groupsList.length > 0 ? JSON.stringify(groupsList) : null,
+          startTime: parsedStartTime,
+          endTime: parsedEndTime,
         },
       });
       return { ...created, allowedGroups: groupsList };
@@ -768,6 +776,8 @@ export const dbService = {
       isActive: data.isActive !== undefined ? data.isActive : true,
       accessCode,
       allowedGroups: groupsList,
+      startTime: parsedStartTime?.toISOString() || null,
+      endTime: parsedEndTime?.toISOString() || null,
       createdAt: new Date().toISOString(),
     };
     store.tests.push(newTest);
@@ -787,6 +797,8 @@ export const dbService = {
           timeLimit: data.timeLimit,
           passingScore: data.passingScore,
           isActive: data.isActive,
+          startTime: data.startTime !== undefined ? (data.startTime ? new Date(data.startTime) : null) : undefined,
+          endTime: data.endTime !== undefined ? (data.endTime ? new Date(data.endTime) : null) : undefined,
           allowedGroups: data.allowedGroups !== undefined
             ? (data.allowedGroups.length > 0 ? JSON.stringify(data.allowedGroups) : null)
             : undefined,
@@ -1582,21 +1594,58 @@ export const dbService = {
   }> {
     let allowedGroups: string[] = [];
     let title = "";
+    let testObj: any = null;
 
     if (await checkPostgres()) {
       const test = await (prisma.test as any).findUnique({
         where: { id: testId },
-        select: { title: true, allowedGroups: true },
+        select: { title: true, allowedGroups: true, startTime: true, endTime: true },
       });
       if (!test) return { allowed: false, reason: "Test topilmadi", allowedGroups: [] };
+      testObj = test;
       allowedGroups = parseAllowedGroups(test.allowedGroups);
       title = test.title;
     } else {
       const store = readLocalStore();
       const test = store.tests.find((t: any) => t.id === testId);
       if (!test) return { allowed: false, reason: "Test topilmadi", allowedGroups: [] };
+      testObj = test;
       allowedGroups = parseAllowedGroups(test.allowedGroups);
       title = test.title;
+    }
+
+    // 1. Muddat (Deadline) va boshlanish vaqtini tekshirish
+    const now = new Date();
+    if (testObj.startTime && now < new Date(testObj.startTime)) {
+      const startStr = new Date(testObj.startTime).toLocaleString("uz-UZ", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return {
+        allowed: false,
+        reason: `Ushbu test hali boshlanmadi. Belgilangan boshlanish vaqti: ${startStr}`,
+        allowedGroups,
+        testTitle: title,
+      };
+    }
+
+    if (testObj.endTime && now > new Date(testObj.endTime)) {
+      const endStr = new Date(testObj.endTime).toLocaleString("uz-UZ", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      return {
+        allowed: false,
+        reason: `Ushbu test topshirish muddati yakunlangan. Qabul yopilgan vaqt: ${endStr}`,
+        allowedGroups,
+        testTitle: title,
+      };
     }
 
     // Agar hech qanday guruh belgilanmagan bo'lsa -> test hamma uchun ochiq

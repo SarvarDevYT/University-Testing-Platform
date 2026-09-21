@@ -41,6 +41,8 @@ model Test {
   isActive      Boolean      @default(true)
   accessCode    String       @unique @default(uuid()) // Ommaviy havola (mass link / QR-kod) uchun
   allowedGroups String?      // Ruxsat berilgan guruhlar JSON ro'yxati (masalan: '["DI-210", "KI-104"]')
+  startTime     DateTime?    // Test boshlanish vaqti
+  endTime       DateTime?    // Test tugash muddati (deadline)
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
