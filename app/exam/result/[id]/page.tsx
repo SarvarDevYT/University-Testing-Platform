@@ -12,6 +12,7 @@ import {
   ArrowRight,
   GraduationCap,
   Sparkles,
+  Layers,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { formatDate } from "@/lib/format";
@@ -50,10 +51,11 @@ export default function ExamResultPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B132B] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0C0E14] flex items-center justify-center relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none -z-10" />
         <div className="text-center">
-          <div className="w-10 h-10 border-3 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-xs text-slate-400">Natijalar tahlil qilinmoqda...</p>
+          <div className="w-12 h-12 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-xs font-semibold text-slate-400">Natijalar tahlil qilinmoqda...</p>
         </div>
       </div>
     );
@@ -61,14 +63,14 @@ export default function ExamResultPage({
 
   if (error || !result) {
     return (
-      <div className="min-h-screen bg-[#0B132B] flex items-center justify-center p-4">
-        <div className="glass-panel p-8 rounded-3xl max-w-md w-full text-center border border-white/10">
+      <div className="min-h-screen bg-[#0C0E14] flex items-center justify-center p-4 relative overflow-hidden">
+        <div className="glass-panel p-8 rounded-3xl max-w-md w-full text-center border border-white/10 shadow-2xl">
           <XCircle className="w-12 h-12 text-rose-400 mx-auto mb-3" />
           <h2 className="text-lg font-bold text-white mb-2">Natija topilmadi</h2>
           <p className="text-xs text-slate-400 mb-6">{error}</p>
           <Link
             href="/"
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold inline-block"
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold inline-block shadow-lg shadow-emerald-600/30 transition-all"
           >
             Bosh sahifaga qaytish
           </Link>
@@ -82,21 +84,25 @@ export default function ExamResultPage({
   const questions = test?.questions || [];
 
   return (
-    <div className="min-h-screen bg-[#0B132B] text-slate-100 py-10 px-4 sm:px-8">
+    <div className="min-h-screen bg-[#0C0E14] text-slate-100 py-10 px-4 sm:px-8 relative overflow-hidden">
+      {/* Orqa fon nur effekti */}
+      <div className="fixed top-0 left-1/4 -translate-x-1/2 w-[600px] h-[400px] bg-emerald-500/[0.04] rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="fixed bottom-0 right-10 w-[500px] h-[350px] bg-teal-500/[0.03] rounded-full blur-3xl pointer-events-none -z-10" />
+
       <div className="max-w-3xl mx-auto space-y-8">
-        {/* NAVIGATSIYA & CHOP ETISH TUGMALARI (Ekranda ko'rinadi, qog'ozda yashiriladi) */}
+        {/* NAVIGATSIYA & CHOP ETISH TUGMALARI */}
         <div className="no-print flex items-center justify-between">
           <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition-colors"
+            href="/student/dashboard"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-emerald-400 transition-colors"
           >
             <Home className="w-4 h-4" />
-            <span>Bosh sahifa</span>
+            <span>Shaxsiy kabinetga qaytish</span>
           </Link>
 
           <button
             onClick={() => window.print()}
-            className="px-4 py-2 rounded-xl bg-[#1C2541] hover:bg-[#253259] text-xs font-bold text-cyan-300 border border-white/10 hover:border-cyan-400/40 flex items-center gap-2 transition-all cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-[#141822] hover:bg-[#1A1F2C] text-xs font-bold text-emerald-300 border border-white/10 hover:border-emerald-500/40 flex items-center gap-2 transition-all cursor-pointer shadow-lg"
           >
             <Printer className="w-4 h-4" />
             <span>Chop etish / PDF</span>
@@ -107,12 +113,13 @@ export default function ExamResultPage({
         <div className="glass-panel p-8 sm:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
           {/* Header */}
           <div className="text-center border-b border-white/10 pb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center mx-auto shadow-xl shadow-indigo-600/30 mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/20 mb-4">
               <GraduationCap className="w-8 h-8 text-white" />
             </div>
 
-            <div className="text-[11px] font-bold text-cyan-400 uppercase tracking-widest mb-1">
-              Universitet Raqamli Baholash Hujjati
+            <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest mb-1 flex items-center justify-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Universitet Raqamli Baholash Hujjati</span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
@@ -122,7 +129,7 @@ export default function ExamResultPage({
             <p className="text-xs text-slate-400 mt-2">
               Sinaluvchi: <strong className="text-white">{result.user?.fullName || result.guestName}</strong>
               {(result.user?.groupName || result.guestGroup) && (
-                <span> | Guruh: <strong className="text-cyan-400">{result.user?.groupName || result.guestGroup}</strong></span>
+                <span> | Guruh: <strong className="text-emerald-400 font-mono">{result.user?.groupName || result.guestGroup}</strong></span>
               )}
             </p>
           </div>
@@ -130,29 +137,29 @@ export default function ExamResultPage({
           {/* Katta Ball & Foiz */}
           <div className="py-10 text-center flex flex-col items-center justify-center">
             <div
-              className={`w-32 h-32 rounded-full border-4 flex flex-col items-center justify-center shadow-2xl mb-4 ${
+              className={`w-36 h-36 rounded-full border-4 flex flex-col items-center justify-center shadow-2xl mb-5 ${
                 result.passed
-                  ? "border-emerald-400 bg-emerald-950/40 shadow-emerald-500/20"
-                  : "border-rose-400 bg-rose-950/40 shadow-rose-500/20"
+                  ? "border-emerald-400 bg-emerald-950/50 shadow-emerald-500/20"
+                  : "border-rose-400 bg-rose-950/50 shadow-rose-500/20"
               }`}
             >
-              <span className="text-3xl font-extrabold text-white">
+              <span className="text-4xl font-black text-white">
                 {result.scorePercent}%
               </span>
-              <span className="text-[10px] font-bold uppercase text-slate-300">
+              <span className="text-[11px] font-bold uppercase text-slate-300 mt-0.5">
                 {result.correctAnswers}/{result.totalQuestions} to&apos;g&apos;ri
               </span>
             </div>
 
             <div className="inline-flex items-center gap-2">
               {result.passed ? (
-                <div className="px-4 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold text-sm flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
+                <div className="px-5 py-2 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-500/10">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                   <span>Sinovdan Muvaffaqiyatli O&apos;tdingiz!</span>
                 </div>
               ) : (
-                <div className="px-4 py-1.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-sm flex items-center gap-1.5">
-                  <XCircle className="w-4 h-4" />
+                <div className="px-5 py-2 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold text-sm flex items-center gap-2 shadow-lg shadow-rose-500/10">
+                  <XCircle className="w-4 h-4 text-rose-400" />
                   <span>Yetarli ball to&apos;planmadi (O&apos;tmadi)</span>
                 </div>
               )}
@@ -160,7 +167,7 @@ export default function ExamResultPage({
           </div>
 
           {/* Tafsilotlar Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4 px-5 rounded-2xl bg-black/40 border border-white/5 text-center text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4 px-5 rounded-2xl bg-[#141822]/80 border border-white/5 text-center text-xs">
             <div>
               <div className="text-[10px] text-slate-400">Jami savollar</div>
               <div className="font-bold text-white mt-0.5">{result.totalQuestions} ta</div>
@@ -171,12 +178,12 @@ export default function ExamResultPage({
             </div>
             <div>
               <div className="text-[10px] text-slate-400">Sarflangan vaqt</div>
-              <div className="font-bold text-cyan-400 mt-0.5">
+              <div className="font-bold text-teal-300 mt-0.5">
                 {Math.floor(result.timeSpentSeconds / 60)} daq {result.timeSpentSeconds % 60} sek
               </div>
             </div>
             <div>
-              <div className="text-[10px] text-slate-400">Sana (Kun:Oy:Yil)</div>
+              <div className="text-[10px] text-slate-400">Sana</div>
               <div className="font-bold text-slate-200 mt-0.5 font-mono">
                 {formatDate(result.createdAt)}
               </div>
@@ -186,9 +193,10 @@ export default function ExamResultPage({
 
         {/* SAVOLLARNING TO'LIQ TAHLILI */}
         {questions.length > 0 && (
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 space-y-4">
-            <h3 className="text-base font-bold text-white mb-4">
-              Savollar Tahlili va To&apos;g&apos;ri Javoblar
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/10 space-y-4 shadow-2xl">
+            <h3 className="text-base font-bold text-white mb-4 flex items-center gap-2">
+              <Layers className="w-4 h-4 text-emerald-400" />
+              <span>Savollar Tahlili va To&apos;g&apos;ri Javoblar</span>
             </h3>
 
             <div className="space-y-4">
@@ -199,7 +207,7 @@ export default function ExamResultPage({
                 return (
                   <div
                     key={q.id}
-                    className={`p-4 rounded-2xl border ${
+                    className={`p-4 rounded-2xl border transition-colors ${
                       isCorrect
                         ? "bg-emerald-950/20 border-emerald-500/20"
                         : "bg-rose-950/20 border-rose-500/20"
@@ -207,16 +215,16 @@ export default function ExamResultPage({
                   >
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="text-xs font-semibold text-white">
-                        <span className="font-bold text-slate-400 mr-2">{idx + 1}.</span>
+                        <span className="font-bold text-emerald-400 mr-2">{idx + 1}.</span>
                         {q.questionText}
                       </div>
 
                       {isCorrect ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 shrink-0">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 shrink-0 border border-emerald-500/30">
                           To&apos;g&apos;ri
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 shrink-0">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 shrink-0 border border-rose-500/30">
                           Noto&apos;g&apos;ri
                         </span>
                       )}
@@ -247,15 +255,15 @@ export default function ExamResultPage({
         <div className="no-print flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
           <Link
             href="/"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#1C2541] hover:bg-[#253259] text-xs font-bold text-white text-center transition-all"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#141822] hover:bg-[#1A1F2C] border border-white/10 text-xs font-bold text-slate-300 text-center transition-all"
           >
             Bosh sahifaga qaytish
           </Link>
           <Link
-            href="/login"
-            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white text-center shadow-lg transition-all"
+            href="/student/dashboard"
+            className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white text-center shadow-lg shadow-emerald-600/30 transition-all"
           >
-            Shaxsiy kabinetga kirish
+            Shaxsiy kabinetga o&apos;tish
           </Link>
         </div>
       </div>
