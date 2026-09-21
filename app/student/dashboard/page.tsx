@@ -27,38 +27,36 @@ export default function StudentDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Foydalanuvchini tekshirish
-    fetch("/api/auth/me")
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
-      })
-      .then(async (data) => {
-        if (!data?.user) {
+    let isMounted = true;
+
+    async function loadData() {
+      try {
+        const res = await fetch("/api/student/dashboard");
+        if (res.status === 401) {
           router.push("/login");
           return;
         }
-        setUser(data.user);
+        const data = await res.json();
+        if (!isMounted) return;
 
-        // 2. Testlarni olish
-        const testsRes = await fetch("/api/exam/all-active");
-        // Fallback: Agar bu route bo'lmasa asosiy testlarni olamiz
-        const testsData = await fetch("/api/admin/tests").then((r) => r.json()).catch(() => ({ tests: [] }));
-        if (testsData?.tests) {
-          setTests(testsData.tests.filter((t: any) => t.isActive));
+        if (data?.user) {
+          setUser(data.user);
+          setTests(data.tests || []);
+          setResults(data.results || []);
+        } else {
+          router.push("/login");
         }
+      } catch (err) {
+        console.error("Dashboard yuklashda xatolik:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
 
-        // 3. O'z natijalarini olish
-        const resultsRes = await fetch("/api/admin/results").then((r) => r.json()).catch(() => ({ results: [] }));
-        if (resultsRes?.results) {
-          setResults(resultsRes.results.filter((r: any) => r.userId === data.user.id));
-        }
-
-        setLoading(false);
-      })
-      .catch(() => {
-        router.push("/login");
-      });
+    loadData();
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   const handleLogout = async () => {
@@ -159,7 +157,12 @@ export default function StudentDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {tests.map((test) => {
                 const isUniversal = !test.allowedGroups || test.allowedGroups.length === 0;
-                const isMyGroup = Boolean(user?.groupName && test.allowedGroups?.includes(user.groupName));
+                const isMyGroup = Boolean(
+                  user?.groupName &&
+                  test.allowedGroups?.some(
+                    (g: string) => g.trim().toLowerCase() === user.groupName.trim().toLowerCase()
+                  )
+                );
                 const isAllowed = isUniversal || isMyGroup;
 
                 return (

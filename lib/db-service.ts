@@ -220,13 +220,21 @@ function generateCleanUsername(fullName: string, index: number): string {
 export const dbService = {
   // Foydalanuvchini topish (username orqali)
   async getUserByUsername(username: string) {
+    const cleanUsername = (username || "").trim();
+    if (!cleanUsername) return null;
+
     if (await checkPostgres()) {
-      let user = await prisma.user.findUnique({
-        where: { username },
+      let user = await prisma.user.findFirst({
+        where: {
+          username: {
+            equals: cleanUsername,
+            mode: "insensitive",
+          },
+        },
       });
 
       // Agar Postgres yangi bo'lsa va admin hali kiritilmagan bo'lsa, avtomatik yaratish
-      if (!user && username.toLowerCase() === "adminuniver") {
+      if (!user && cleanUsername.toLowerCase() === "adminuniver") {
         try {
           user = await prisma.user.create({
             data: {
@@ -247,7 +255,7 @@ export const dbService = {
       return user;
     }
     const store = readLocalStore();
-    return store.users.find((u) => u.username.toLowerCase() === username.toLowerCase()) || null;
+    return store.users.find((u) => u.username.toLowerCase() === cleanUsername.toLowerCase()) || null;
   },
 
   // Foydalanuvchini id orqali topish

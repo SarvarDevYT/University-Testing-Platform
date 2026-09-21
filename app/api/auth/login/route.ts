@@ -52,12 +52,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    const isHttps =
+      req.nextUrl.protocol === "https:" ||
+      req.headers.get("x-forwarded-proto") === "https";
+
     // Xavfsiz HTTP-Only Cookie o'rnatish
     response.cookies.set({
       name: TOKEN_NAME,
       value: token,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: isHttps,
       sameSite: "lax",
       path: "/",
       maxAge: 60 * 60 * 24 * 7, // 7 kun
@@ -65,8 +69,9 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error: any) {
+    console.error("Login API error:", error);
     return NextResponse.json(
-      { error: "Tizimda xatolik yuz berdi" },
+      { error: error?.message || "Tizimda xatolik yuz berdi" },
       { status: 500 }
     );
   }
