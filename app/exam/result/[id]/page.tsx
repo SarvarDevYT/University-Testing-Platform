@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { formatDate } from "@/lib/format";
+import { sfx } from "@/lib/sfx";
 
 export default function ExamResultPage({
   params,
@@ -34,12 +35,16 @@ export default function ExamResultPage({
         if (data.result) {
           setResult(data.result);
           if (data.result.passed) {
-            // Bayramona confetti
+            // Bayramona confetti va g'alaba tovushi
             confetti({
               particleCount: 80,
               spread: 70,
               origin: { y: 0.6 },
             });
+            sfx.playVictory();
+          } else {
+            // Sinovdan o'tolmagandagi mayin ogohlantiruvchi signal
+            sfx.playDefeat();
           }
         } else {
           setError(data.error || "Natija topilmadi");

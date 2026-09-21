@@ -19,7 +19,10 @@ import {
   Lock,
   Users,
   Maximize,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
+import { sfx } from "@/lib/sfx";
 
 export default function ExamPage({
   params,
@@ -61,9 +64,11 @@ export default function ExamPage({
   const [violationCount, setViolationCount] = useState(0);
   const [showViolationModal, setShowViolationModal] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   // 1. Foydalanuvchi va Testni yuklash
   useEffect(() => {
+    setIsMuted(sfx.getMuted());
     async function init() {
       try {
         const testRes = await fetch(`/api/exam/${id}`);
@@ -154,6 +159,7 @@ export default function ExamPage({
     if (!isStarted) return;
 
     const triggerViolation = (customMsg?: string) => {
+      sfx.playWarning();
       setViolationCount((prev) => {
         const next = prev + 1;
         if (next >= 3) {
@@ -241,6 +247,7 @@ export default function ExamPage({
 
   // Javobni tanlash va saqlash
   const handleSelectOption = (questionId: string, originalKey: string) => {
+    sfx.playSelectOption();
     const updated = { ...answers, [questionId]: originalKey };
     setAnswers(updated);
   };
@@ -582,6 +589,22 @@ export default function ExamPage({
               <span>{isFullscreen ? "To'liq ekran" : "To'liq ekranga o'tish"}</span>
             </button>
 
+            {/* Ovoz (SFX) yoqish/o'chirish */}
+            <button
+              onClick={() => {
+                const muted = sfx.toggleMute();
+                setIsMuted(muted);
+              }}
+              title={isMuted ? "Ovozni yoqish" : "Ovozni o'chirish"}
+              className="p-2 rounded-xl border border-white/10 text-slate-400 hover:text-white bg-white/5 cursor-pointer transition-colors"
+            >
+              {isMuted ? (
+                <VolumeX className="w-4 h-4 text-rose-400" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-emerald-400" />
+              )}
+            </button>
+
             {/* Yakunlash tugmasi */}
             <button
               onClick={() => setConfirmModalOpen(true)}
@@ -627,7 +650,10 @@ export default function ExamPage({
                 return (
                   <button
                     key={q.id}
-                    onClick={() => setCurrentQuestionIdx(index)}
+                    onClick={() => {
+                      sfx.playQuestionChange();
+                      setCurrentQuestionIdx(index);
+                    }}
                     className={`h-10 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center relative ${
                       isCurrent
                         ? "bg-emerald-600 text-white ring-2 ring-emerald-400 shadow-lg"
@@ -711,7 +737,10 @@ export default function ExamPage({
           {/* PASTKI AMALLAR TUGMALARI */}
           <div className="pt-8 mt-8 border-t border-white/5 flex items-center justify-between gap-4">
             <button
-              onClick={() => setCurrentQuestionIdx((prev) => Math.max(0, prev - 1))}
+              onClick={() => {
+                sfx.playQuestionChange();
+                setCurrentQuestionIdx((prev) => Math.max(0, prev - 1));
+              }}
               disabled={currentQuestionIdx === 0}
               className="px-5 py-2.5 rounded-xl bg-[#1C2541] hover:bg-[#253259] text-xs font-semibold text-slate-300 disabled:opacity-40 disabled:pointer-events-none flex items-center gap-2 transition-all cursor-pointer"
             >
@@ -721,9 +750,10 @@ export default function ExamPage({
 
             {currentQuestionIdx < questions.length - 1 ? (
               <button
-                onClick={() =>
-                  setCurrentQuestionIdx((prev) => Math.min(questions.length - 1, prev + 1))
-                }
+                onClick={() => {
+                  sfx.playQuestionChange();
+                  setCurrentQuestionIdx((prev) => Math.min(questions.length - 1, prev + 1));
+                }}
                 className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white shadow-md shadow-emerald-600/20 flex items-center gap-2 transition-all cursor-pointer"
               >
                 <span>Keyingi</span>
