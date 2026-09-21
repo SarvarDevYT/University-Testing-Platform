@@ -136,7 +136,7 @@ export default function AdminDashboardPage() {
             <span className="text-xs text-emerald-400 font-bold">Faol</span>
           </div>
           <div className="mt-3 text-[11px] text-slate-400 font-medium">
-            Neon Serverless ulanish
+            Doimiy va xavfsiz ulanish
           </div>
         </div>
       </div>

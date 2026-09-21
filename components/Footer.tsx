@@ -9,7 +9,7 @@ import {
   ArrowUpRight,
   ShieldCheck,
   CheckCircle2,
-  Database,
+  Lock,
   KeyRound,
   LogIn,
 } from "lucide-react";
@@ -186,8 +186,8 @@ export default function Footer() {
               </li>
               <li className="pt-1">
                 <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                  <Database className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Neon Cloud PostgreSQL</span>
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Xavfsiz va shifrlangan tizim</span>
                 </div>
               </li>
             </ul>
@@ -204,11 +204,11 @@ export default function Footer() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span>Barcha serverlar faol</span>
+              <span>Tizim faol va barqaror</span>
             </div>
 
             <span className="text-slate-400 text-[11px]">
-              Neon PostgreSQL • Next.js • Vercel
+              Oliy ta&apos;lim muassasalari uchun yagona raqamli tizim
             </span>
           </div>
         </div>

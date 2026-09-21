@@ -210,8 +210,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
 
           <div className="flex items-center gap-4 text-xs">
-            <span className="px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/20 font-semibold">
-              Neon Serverless Postgres
+            <span className="px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Tizim: Faol</span>
             </span>
             <span className="text-slate-400 font-mono">
               {formatDate(new Date())}

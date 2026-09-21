@@ -278,10 +278,10 @@ export default async function HomePage() {
                 <div className="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mb-5">
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Neon Cloud & Yuqori Tezlik</h3>
+                <h3 className="text-lg font-bold text-white mb-2">Yuqori Tezlik va Barqarorlik</h3>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Neon Serverless Postgres va Vercel infratuzilmasi orqali birdaniga yuzlab so&apos;rovlar kelganda ham
-                  sayt qotmaydi, har bir talaba javobi xavfsiz saqlanadi.
+                  Zamonaviy raqamli infratuzilma orqali birdaniga yuzlab talabalar bir vaqtda test topshirganda ham
+                  sayt tezkor ishlaydi, har bir talaba javobi xavfsiz va kafolatli saqlanadi.
                 </p>
               </div>
             </div>
